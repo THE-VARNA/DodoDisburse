@@ -5,6 +5,8 @@ import { fundingIntents, tenants } from '@gcp/db';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 
+import { env } from '@gcp/config';
+
 // Pre-created product IDs in Dodo dashboard — set these in env
 const TIER_PRODUCTS: Record<string, { productId: string; amountMinor: number; label: string }> = {
   tier_50: {
@@ -61,8 +63,8 @@ export async function POST(req: NextRequest) {
     })
     .returning();
 
-  const returnUrl = process.env.DODO_PAYMENTS_RETURN_URL ?? 'http://localhost:3000/funding/return';
-  const cancelUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/funding?status=cancelled`;
+  const returnUrl = env.resolvedReturnUrl;
+  const cancelUrl = `${env.resolvedAppUrl}/funding?status=cancelled`;
 
   // Build customer arg: attach existing if we have dodo_customer_id
   const customerArg = tenant.dodoCustomerId

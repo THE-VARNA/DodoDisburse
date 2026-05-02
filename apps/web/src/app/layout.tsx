@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Sidebar } from '@/components/layout/Sidebar';
+import { SidebarWrapper } from '@/components/layout/SidebarWrapper';
 import { Toaster } from '@/components/layout/Toaster';
 
 export const metadata: Metadata = {
@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <div className="flex min-h-screen">
-          <Sidebar />
+          <SidebarWrapper />
           <main className="flex-1 min-w-0 flex flex-col">
             {children}
           </main>

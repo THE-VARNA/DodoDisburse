@@ -26,7 +26,7 @@ async function seed() {
   const [tenant] = await db.execute(sql`
     INSERT INTO tenants (id, name, slug, available_balance_minor, reserved_balance_minor, total_funded_minor, total_disbursed_minor)
     VALUES (
-      gen_random_uuid(),
+      ${process.env.DEMO_TENANT_ID || 'f582c4cf-2f41-48e9-a795-d2f263f6baf1'},
       'Acme AI Corp',
       'acme-ai',
       0, 0, 0, 0

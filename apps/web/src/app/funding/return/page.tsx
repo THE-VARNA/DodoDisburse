@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'motion/react';
 import { CheckCircle, Clock, XCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
-export default function FundingReturnPage() {
+function ReturnContent() {
   const params = useSearchParams();
   const paymentId = params.get('payment_id');
   const status = params.get('status');
@@ -71,5 +71,13 @@ export default function FundingReturnPage() {
         </div>
       </motion.div>
     </div>
+  );
+}
+
+export default function FundingReturnPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div className="loading-spinner"></div></div>}>
+      <ReturnContent />
+    </Suspense>
   );
 }
