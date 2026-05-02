@@ -1,8 +1,10 @@
-import { db } from '@gcp/db';
+import { createDb } from '@gcp/db';
 import { payoutBatches, payoutItems, contractors, tenants, ledgerEntries } from '@gcp/db';
 import { eq, and } from 'drizzle-orm';
 import { transferUsdc } from '@gcp/solana';
 import { env } from '@gcp/config';
+
+const db = createDb(env.DATABASE_URL);
 
 async function processPendingBatches() {
   console.log(`[${new Date().toISOString()}] Worker starting payout processing run...`);

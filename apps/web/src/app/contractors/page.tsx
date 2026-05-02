@@ -37,7 +37,9 @@ export default function ContractorsPage() {
   async function load() {
     try {
       const res = await fetch(`/api/contractors?tenantId=${DEMO_TENANT_ID}`);
-      setContractors(await res.json());
+      const data = await res.json();
+      if (Array.isArray(data)) setContractors(data);
+      else setContractors([]);
     } catch { /* ignore */ }
     setLoading(false);
   }

@@ -20,7 +20,13 @@ export default function NewBatchPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/contractors?tenantId=${DEMO_TENANT_ID}`).then((r) => r.json()).then(setContractors);
+    fetch(`/api/contractors?tenantId=${DEMO_TENANT_ID}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) setContractors(data);
+        else setContractors([]);
+      })
+      .catch(() => setContractors([]));
   }, []);
 
   function addItem(contractorId: string) {

@@ -7,6 +7,13 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@neondatabase/serverless':
+        specifier: 1.0.1
+        version: 1.0.1
+      drizzle-orm:
+        specifier: 0.45.2
+        version: 0.45.2(@neondatabase/serverless@1.0.1)(@types/pg@8.20.0)
     devDependencies:
       '@types/node':
         specifier: 24.3.1

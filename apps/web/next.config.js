@@ -1,13 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ['@gcp/db', '@gcp/config', '@gcp/solana'],
-  experimental: {
-    serverComponentsExternalPackages: [
-      '@solana/web3.js',
-      '@solana/spl-token',
-      'bs58',
-    ],
-  },
+  serverExternalPackages: ['@solana/web3.js', 'bigint-buffer', 'dodopayments', 'drizzle-orm'],
 };
 
-module.exports = nextConfig;
+export default nextConfig;
