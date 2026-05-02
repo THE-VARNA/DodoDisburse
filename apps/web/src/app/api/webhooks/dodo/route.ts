@@ -187,12 +187,16 @@ export async function POST(req: NextRequest) {
     eventDbId = ev.id;
   }
 
-  // Process in background, return 200 immediately
-  processEvent(payload, eventDbId).catch(async (err: any) => {
+  // Process synchronously to ensure Vercel doesn't freeze the lambda before completion
+  try {
+    await processEvent(payload, eventDbId);
+  } catch (err: any) {
+    console.error('[webhook] processing error:', err);
     await db.update(webhookEvents)
       .set({ errorMessage: String(err) })
       .where(eq(webhookEvents.id, eventDbId));
-  });
+    // We still return 200 so Dodo doesn't keep retrying a broken payload
+  }
 
   return ok();
 }
