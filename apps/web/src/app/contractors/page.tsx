@@ -6,7 +6,7 @@ import { Plus, Upload, Search, Users, X, Check } from 'lucide-react';
 import { toast } from '@/components/layout/Toaster';
 import { shortenAddress } from '@/lib/utils';
 
-const DEMO_TENANT_ID = process.env.NEXT_PUBLIC_DEMO_TENANT_ID ?? '';
+const DEMO_TENANT_ID = process.env.NEXT_PUBLIC_DEMO_TENANT_ID || 'f582c4cf-2f41-48e9-a795-d2f263f6baf1';
 
 interface Contractor {
   id: string;

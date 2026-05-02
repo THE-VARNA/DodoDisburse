@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Download, BarChart3 } from 'lucide-react';
 
-const DEMO_TENANT_ID = process.env.NEXT_PUBLIC_DEMO_TENANT_ID ?? '';
+const DEMO_TENANT_ID = process.env.NEXT_PUBLIC_DEMO_TENANT_ID || 'f582c4cf-2f41-48e9-a795-d2f263f6baf1';
 
 export default function ReportsPage() {
   const [downloading, setDownloading] = useState(false);

@@ -2,7 +2,7 @@ import { db } from '@/lib/db';
 import { fundingIntents } from '@gcp/db';
 import { eq, desc } from 'drizzle-orm';
 import FundingClient from './FundingClient';
-const DEMO_TENANT_ID = process.env.DEMO_TENANT_ID ?? '';
+const DEMO_TENANT_ID = process.env.DEMO_TENANT_ID || 'f582c4cf-2f41-48e9-a795-d2f263f6baf1';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
