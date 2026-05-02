@@ -37,60 +37,86 @@ const schema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const parsed = schema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  try {
+    const body = await req.json();
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+    }
+
+    const { tenantId, tier } = parsed.data;
+    const tierInfo = TIER_PRODUCTS[tier];
+
+    // Verify tenant exists
+    let tenant;
+    try {
+      const rows = await db.select().from(tenants).where(eq(tenants.id, tenantId));
+      tenant = rows[0];
+    } catch (dbErr: any) {
+      console.error('[checkout-link] DB error fetching tenant:', dbErr?.message ?? dbErr);
+      return NextResponse.json({ error: 'Database unavailable. Please ensure the schema is migrated and the tenant is seeded.' }, { status: 503 });
+    }
+
+    if (!tenant) {
+      return NextResponse.json({ error: `Tenant not found: ${tenantId}. Run: node scripts/seed.mjs` }, { status: 404 });
+    }
+
+    // Create funding intent record first
+    let intent;
+    try {
+      const rows = await db
+        .insert(fundingIntents)
+        .values({
+          tenantId,
+          tierLabel: tierInfo.label,
+          amountMinor: tierInfo.amountMinor,
+          status: 'pending',
+        })
+        .returning();
+      intent = rows[0];
+    } catch (dbErr: any) {
+      console.error('[checkout-link] DB error inserting intent:', dbErr?.message ?? dbErr);
+      return NextResponse.json({ error: 'Failed to create funding intent in database.' }, { status: 503 });
+    }
+
+    const returnUrl = env.resolvedReturnUrl;
+    const cancelUrl = `${env.resolvedAppUrl}/funding?status=cancelled`;
+
+    // Build customer arg: attach existing if we have dodo_customer_id
+    const customerArg = tenant.dodoCustomerId
+      ? { customer_id: tenant.dodoCustomerId }
+      : undefined;
+
+    // Create Dodo checkout session via SDK directly
+    let session;
+    try {
+      session = await dodo.checkoutSessions.create({
+        product_cart: [{ product_id: tierInfo.productId, quantity: 1 }],
+        return_url: returnUrl,
+        metadata: {
+          funding_intent_id: intent.id,
+          tenant_id: tenantId,
+        },
+        ...(customerArg ? { customer: customerArg } : {}),
+      });
+    } catch (dodoErr: any) {
+      console.error('[checkout-link] Dodo SDK error:', dodoErr?.message ?? dodoErr);
+      return NextResponse.json({ error: `Dodo Payments error: ${dodoErr?.message ?? 'Unknown error'}` }, { status: 502 });
+    }
+
+    // Store session ID on intent
+    await db
+      .update(fundingIntents)
+      .set({ dodoSessionId: session.session_id })
+      .where(eq(fundingIntents.id, intent.id));
+
+    return NextResponse.json({
+      checkout_url: session.checkout_url,
+      session_id: session.session_id,
+      intent_id: intent.id,
+    });
+  } catch (err: any) {
+    console.error('[checkout-link] Unhandled error:', err?.message ?? err);
+    return NextResponse.json({ error: `Internal server error: ${err?.message ?? 'Unknown'}` }, { status: 500 });
   }
-
-  const { tenantId, tier } = parsed.data;
-  const tierInfo = TIER_PRODUCTS[tier];
-
-  // Verify tenant exists
-  const [tenant] = await db.select().from(tenants).where(eq(tenants.id, tenantId));
-  if (!tenant) {
-    return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
-  }
-
-  // Create funding intent record first
-  const [intent] = await db
-    .insert(fundingIntents)
-    .values({
-      tenantId,
-      tierLabel: tierInfo.label,
-      amountMinor: tierInfo.amountMinor,
-      status: 'pending',
-    })
-    .returning();
-
-  const returnUrl = env.resolvedReturnUrl;
-  const cancelUrl = `${env.resolvedAppUrl}/funding?status=cancelled`;
-
-  // Build customer arg: attach existing if we have dodo_customer_id
-  const customerArg = tenant.dodoCustomerId
-    ? { customer_id: tenant.dodoCustomerId }
-    : undefined;
-
-  // Create Dodo checkout session via SDK directly
-  const session = await dodo.checkoutSessions.create({
-    product_cart: [{ product_id: tierInfo.productId, quantity: 1 }],
-    return_url: returnUrl,
-    metadata: {
-      funding_intent_id: intent.id,
-      tenant_id: tenantId,
-    },
-    ...(customerArg ? { customer: customerArg } : {}),
-  });
-
-  // Store session ID on intent
-  await db
-    .update(fundingIntents)
-    .set({ dodoSessionId: session.session_id })
-    .where(eq(fundingIntents.id, intent.id));
-
-  return NextResponse.json({
-    checkout_url: session.checkout_url,
-    session_id: session.session_id,
-    intent_id: intent.id,
-  });
 }
