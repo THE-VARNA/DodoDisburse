@@ -73,7 +73,6 @@ export async function POST(req: NextRequest) {
   const session = await dodo.checkoutSessions.create({
     product_cart: [{ product_id: tierInfo.productId, quantity: 1 }],
     return_url: returnUrl,
-    cancel_url: cancelUrl,
     metadata: {
       funding_intent_id: intent.id,
       tenant_id: tenantId,
