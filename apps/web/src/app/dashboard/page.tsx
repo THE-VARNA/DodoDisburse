@@ -6,6 +6,9 @@ import { DashboardClient } from './DashboardClient';
 // Demo tenant ID — seeded on first run
 const DEMO_TENANT_ID = process.env.DEMO_TENANT_ID ?? '';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function DashboardPage() {
   let tenant = null;
   let recentIntents: typeof fundingIntents.$inferSelect[] = [];

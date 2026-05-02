@@ -2,8 +2,10 @@ import { db } from '@/lib/db';
 import { fundingIntents } from '@gcp/db';
 import { eq, desc } from 'drizzle-orm';
 import FundingClient from './FundingClient';
-
 const DEMO_TENANT_ID = process.env.DEMO_TENANT_ID ?? '';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function FundingPage() {
   let intents: any[] = [];
