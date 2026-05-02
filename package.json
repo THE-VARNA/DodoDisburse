@@ -1,0 +1,21 @@
+{
+  "name": "global-contractor-payout-hub",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.15.1",
+  "scripts": {
+    "dev": "pnpm --filter @gcp/web dev",
+    "build": "pnpm --filter @gcp/web build",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "typecheck": "tsc --noEmit -p tsconfig.base.json && pnpm --filter @gcp/web exec tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "24.3.1",
+    "drizzle-kit": "0.31.4",
+    "typescript": "5.9.2",
+    "dotenv": "16.5.0"
+  }
+}

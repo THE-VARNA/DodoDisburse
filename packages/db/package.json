@@ -1,0 +1,12 @@
+{
+  "name": "@gcp/db",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@neondatabase/serverless": "1.0.1",
+    "drizzle-orm": "0.45.2",
+    "zod": "4.1.5"
+  }
+}

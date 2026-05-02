@@ -1,0 +1,25 @@
+{
+  "name": "@gcp/worker",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@gcp/config": "workspace:*",
+    "@gcp/db": "workspace:*",
+    "@gcp/solana": "workspace:*",
+    "@neondatabase/serverless": "1.0.1",
+    "@solana/spl-token": "0.4.14",
+    "@solana/web3.js": "1.98.4",
+    "bs58": "6.0.0",
+    "dodopayments": "1.52.5",
+    "drizzle-orm": "0.45.2",
+    "zod": "4.1.5"
+  },
+  "devDependencies": {
+    "tsx": "4.19.4",
+    "typescript": "5.9.2"
+  }
+}
