@@ -13,46 +13,122 @@ export async function GET(req: NextRequest) {
   const results: string[] = [];
 
   try {
-    // ── Create Tables ─────────────────────────────────────────────
+    // ── Drop all tables in reverse FK order so we start fresh ─────
+    await db.execute(sql`DROP TABLE IF EXISTS ledger_entries CASCADE`);
+    await db.execute(sql`DROP TABLE IF EXISTS payout_items CASCADE`);
+    await db.execute(sql`DROP TABLE IF EXISTS payout_batches CASCADE`);
+    await db.execute(sql`DROP TABLE IF EXISTS refunds CASCADE`);
+    await db.execute(sql`DROP TABLE IF EXISTS payments CASCADE`);
+    await db.execute(sql`DROP TABLE IF EXISTS webhook_events CASCADE`);
+    await db.execute(sql`DROP TABLE IF EXISTS funding_intents CASCADE`);
+    await db.execute(sql`DROP TABLE IF EXISTS contractors CASCADE`);
+    await db.execute(sql`DROP TABLE IF EXISTS tenants CASCADE`);
+    results.push('🗑️ Old tables dropped');
+
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS tenants (
-        id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        name          TEXT NOT NULL,
-        slug          TEXT NOT NULL UNIQUE,
-        dodo_customer_id TEXT,
-        available_balance_minor  BIGINT NOT NULL DEFAULT 0,
-        reserved_balance_minor   BIGINT NOT NULL DEFAULT 0,
-        total_funded_minor       BIGINT NOT NULL DEFAULT 0,
-        total_disbursed_minor    BIGINT NOT NULL DEFAULT 0,
-        created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name                    TEXT NOT NULL,
+        slug                    TEXT NOT NULL UNIQUE,
+        dodo_customer_id        TEXT,
+        available_balance_minor BIGINT NOT NULL DEFAULT 0,
+        reserved_balance_minor  BIGINT NOT NULL DEFAULT 0,
+        total_funded_minor      BIGINT NOT NULL DEFAULT 0,
+        total_disbursed_minor   BIGINT NOT NULL DEFAULT 0,
+        created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
     results.push('✅ tenants table ready');
+
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS funding_intents (
+        id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id        UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        tier_label       TEXT NOT NULL,
+        amount_minor     BIGINT NOT NULL,
+        dodo_payment_id  TEXT,
+        dodo_session_id  TEXT,
+        status           TEXT NOT NULL DEFAULT 'pending',
+        created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        confirmed_at     TIMESTAMPTZ
+      )
+    `);
+    results.push('✅ funding_intents table ready');
+
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS payments (
+        id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id             UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        funding_intent_id     UUID REFERENCES funding_intents(id),
+        dodo_payment_id       TEXT NOT NULL UNIQUE,
+        amount_minor          BIGINT NOT NULL,
+        refunded_amount_minor BIGINT NOT NULL DEFAULT 0,
+        net_amount_minor      BIGINT NOT NULL,
+        status                TEXT NOT NULL DEFAULT 'pending',
+        created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+    results.push('✅ payments table ready');
+
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS refunds (
+        id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        payment_id      UUID NOT NULL REFERENCES payments(id) ON DELETE RESTRICT,
+        dodo_refund_id  TEXT UNIQUE,
+        amount_minor    BIGINT NOT NULL,
+        reason          TEXT,
+        status          TEXT NOT NULL DEFAULT 'pending',
+        created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+    results.push('✅ refunds table ready');
+
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS webhook_events (
+        id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        webhook_id    TEXT UNIQUE,
+        event_type    TEXT NOT NULL,
+        data          JSONB NOT NULL,
+        processed     BOOLEAN NOT NULL DEFAULT FALSE,
+        error_message TEXT,
+        attempts      INTEGER NOT NULL DEFAULT 0,
+        created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        processed_at  TIMESTAMPTZ
+      )
+    `);
+    results.push('✅ webhook_events table ready');
 
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS contractors (
         id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         tenant_id      UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
         name           TEXT NOT NULL,
-        email          TEXT,
+        email          TEXT NOT NULL,
         wallet_address TEXT NOT NULL,
         status         TEXT NOT NULL DEFAULT 'active',
-        created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
     results.push('✅ contractors table ready');
 
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS payout_batches (
-        id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        tenant_id   UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-        name        TEXT NOT NULL,
-        status      TEXT NOT NULL DEFAULT 'draft',
-        total_minor BIGINT NOT NULL DEFAULT 0,
-        approved_at TIMESTAMPTZ,
-        executed_at TIMESTAMPTZ,
-        created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id         UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        label             TEXT NOT NULL,
+        note              TEXT,
+        status            TEXT NOT NULL DEFAULT 'draft',
+        total_amount_minor BIGINT NOT NULL DEFAULT 0,
+        recipient_count   INTEGER NOT NULL DEFAULT 0,
+        reserved_at       TIMESTAMPTZ,
+        executed_at       TIMESTAMPTZ,
+        created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
     results.push('✅ payout_batches table ready');
@@ -61,43 +137,29 @@ export async function GET(req: NextRequest) {
       CREATE TABLE IF NOT EXISTS payout_items (
         id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         batch_id        UUID NOT NULL REFERENCES payout_batches(id) ON DELETE CASCADE,
-        contractor_id   UUID NOT NULL REFERENCES contractors(id),
+        contractor_id   UUID NOT NULL REFERENCES contractors(id) ON DELETE RESTRICT,
         amount_minor    BIGINT NOT NULL,
-        description     TEXT,
         status          TEXT NOT NULL DEFAULT 'pending',
-        solana_tx_sig   TEXT,
+        tx_signature    TEXT,
         error_message   TEXT,
-        created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        executed_at     TIMESTAMPTZ,
+        confirmed_at    TIMESTAMPTZ
       )
     `);
     results.push('✅ payout_items table ready');
 
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS ledger_entries (
-        id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        tenant_id    UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-        type         TEXT NOT NULL,
-        amount_minor BIGINT NOT NULL,
-        reference_id TEXT,
-        note         TEXT,
-        created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        type            TEXT NOT NULL,
+        amount_minor    BIGINT NOT NULL,
+        reference_id    TEXT NOT NULL,
+        reference_type  TEXT NOT NULL,
+        created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
     results.push('✅ ledger_entries table ready');
-
-    await db.execute(sql`
-      CREATE TABLE IF NOT EXISTS funding_intents (
-        id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        tenant_id        UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-        tier_label       TEXT NOT NULL,
-        amount_minor     BIGINT NOT NULL,
-        status           TEXT NOT NULL DEFAULT 'pending',
-        dodo_session_id  TEXT,
-        dodo_payment_id  TEXT,
-        created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `);
-    results.push('✅ funding_intents table ready');
 
     // ── Seed Demo Tenant ──────────────────────────────────────────
     const TENANT_ID = process.env.DEMO_TENANT_ID || 'f582c4cf-2f41-48e9-a795-d2f263f6baf1';
