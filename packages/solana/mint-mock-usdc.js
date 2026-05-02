@@ -4,7 +4,7 @@ const bs58 = require('bs58').default || require('bs58');
 
 async function main() {
   const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
-  
+
   // The treasury secret key we generated
   const treasurySecret = '44dEcC89z1SyNHBpA9Kcmb5RcAPcvJTpFuMAoWvAiMkGN5UMV4irMiWzJRjnsEye5Br7D5xtHQWxUuJ4yhr19wdZ';
   const treasury = Keypair.fromSecretKey(bs58.decode(treasurySecret));
@@ -43,7 +43,7 @@ async function main() {
     treasury.publicKey,
     amountToMint
   );
-  
+
   console.log('🎉 Successfully funded Treasury with 1,000,000 Mock USDC!');
   console.log('\\n👉 ACTION REQUIRED: Update your Vercel Environment Variables:');
   console.log(`SOLANA_USDC_MINT=${mint.toBase58()}`);
