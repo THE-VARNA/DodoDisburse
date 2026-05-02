@@ -9,7 +9,8 @@ export async function GET() {
       id: payoutItems.id,
       status: payoutItems.status,
       errorMessage: payoutItems.errorMessage,
-      executedAt: payoutItems.executedAt
+      executedAt: payoutItems.executedAt,
+      amountMinor: payoutItems.amountMinor
     })
     .from(payoutItems)
     .orderBy(desc(payoutItems.executedAt))
