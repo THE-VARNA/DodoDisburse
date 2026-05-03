@@ -72,7 +72,7 @@ export default function FundingPageClient({ intents }: Props) {
   }
 
   return (
-    <div style={{ padding: '40px', maxWidth: 900 }}>
+    <div style={{ padding: '40px', maxWidth: 1000 }}>
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
           <h1 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc', margin: 0 }}>
@@ -107,7 +107,7 @@ export default function FundingPageClient({ intents }: Props) {
       {/* Tier Cards */}
       <motion.div
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}
-        style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginTop: 32 }}
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginTop: 32 }}
       >
         {TIERS.map((tier) => (
           <div
