@@ -7,57 +7,39 @@ import { z } from 'zod';
 
 import { env } from '@gcp/config';
 
-const TIER_PRODUCTS: Record<string, { productId: string; amountMinor: number; label: string }> = {
+const TIER_PRODUCTS: Record<string, { productId: string; amountMinor: number; label: string; qtyScale?: number }> = {
   tier_50: {
     productId: process.env.DODO_PRODUCT_50 ?? 'prd_50',
     amountMinor: 5000,
     label: '$50 Top-Up',
   },
-  tier_100: {
-    productId: process.env.DODO_PRODUCT_100 ?? 'prd_100',
-    amountMinor: 10000,
-    label: '$100 Top-Up',
-  },
-  tier_250: {
-    productId: process.env.DODO_PRODUCT_250 ?? 'prd_250',
-    amountMinor: 25000,
-    label: '$250 Top-Up',
-  },
-  tier_500: {
-    productId: process.env.DODO_PRODUCT_500 ?? 'prd_500',
-    amountMinor: 50000,
-    label: '$500 Top-Up',
+  tier_1000: {
+    productId: process.env.DODO_PRODUCT_100 ?? 'prd_100', // Scale $100 product by 10
+    amountMinor: 100000,
+    label: '$1000 Top-Up',
+    qtyScale: 10,
   },
   custom: {
-    productId: process.env.DODO_PRODUCT_100 ?? 'prd_1', // Fallback to $100 product
+    productId: process.env.DODO_PRODUCT_100 ?? 'prd_1', 
     amountMinor: 10000,
     label: 'Custom Top-Up',
   },
 };
 
-const SUB_PRODUCTS: Record<string, { productId: string; amountMinor: number; label: string }> = {
+const SUB_PRODUCTS: Record<string, { productId: string; amountMinor: number; label: string; qtyScale?: number }> = {
   tier_50: {
     productId: process.env.DODO_SUB_50 ?? 'prd_sub_50',
     amountMinor: 5000,
     label: '$50 Monthly Auto-Fund',
   },
-  tier_100: {
-    productId: process.env.DODO_SUB_100 ?? 'prd_sub_100',
-    amountMinor: 10000,
-    label: '$100 Monthly Auto-Fund',
-  },
-  tier_250: {
-    productId: process.env.DODO_SUB_250 ?? 'prd_sub_250',
-    amountMinor: 25000,
-    label: '$250 Monthly Auto-Fund',
-  },
-  tier_500: {
-    productId: process.env.DODO_SUB_500 ?? 'prd_sub_500',
-    amountMinor: 50000,
-    label: '$500 Monthly Auto-Fund',
+  tier_1000: {
+    productId: process.env.DODO_SUB_100 ?? 'prd_sub_100', // Scale $100 sub product by 10
+    amountMinor: 100000,
+    label: '$1000 Monthly Auto-Fund',
+    qtyScale: 10,
   },
   custom: {
-    productId: process.env.DODO_SUB_100 ?? 'prd_sub_1', // Fallback to $100 sub product
+    productId: process.env.DODO_SUB_100 ?? 'prd_sub_1', 
     amountMinor: 10000,
     label: 'Custom Monthly Auto-Fund',
   },
@@ -65,7 +47,7 @@ const SUB_PRODUCTS: Record<string, { productId: string; amountMinor: number; lab
 
 const schema = z.object({
   tenantId: z.string().uuid(),
-  tier: z.enum(['tier_50', 'tier_100', 'tier_250', 'tier_500', 'custom']),
+  tier: z.enum(['tier_50', 'tier_1000', 'custom']),
   isSubscription: z.boolean().optional(),
   customAmount: z.number().optional(),
 });
@@ -83,7 +65,7 @@ export async function POST(req: NextRequest) {
     
     let finalAmountMinor = tierInfo.amountMinor;
     let finalLabel = tierInfo.label;
-    let quantity = 1;
+    let quantity = tierInfo.qtyScale ?? 1;
 
     if (tier === 'custom' && customAmount) {
       const isFallback = !process.env.DODO_PRODUCT_CUSTOM;

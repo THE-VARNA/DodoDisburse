@@ -10,9 +10,8 @@ const DEMO_TENANT_ID = 'f582c4cf-2f41-48e9-a795-d2f263f6baf1';
 
 const TIERS = [
   { id: 'tier_50', label: '$50', subLabel: 'Quick Top-Up', amountMinor: 5000, popular: false },
-  { id: 'tier_100', label: '$100', subLabel: 'Standard', amountMinor: 10000, popular: true },
-  { id: 'tier_500', label: '$500', subLabel: 'Enterprise', amountMinor: 50000, popular: false },
-  { id: 'custom', label: 'Custom', subLabel: 'Any Amount', amountMinor: 0, popular: false },
+  { id: 'tier_1000', label: '$1000', subLabel: 'Professional', amountMinor: 100000, popular: true },
+  { id: 'custom', label: 'Custom', subLabel: 'Dynamic Amount', amountMinor: 0, popular: false },
 ];
 
 interface Intent {
