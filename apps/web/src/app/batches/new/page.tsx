@@ -7,7 +7,7 @@ import { Plus, Trash2, Send, DollarSign } from 'lucide-react';
 import { toast } from '@/components/layout/Toaster';
 import { formatUsd, shortenAddress } from '@/lib/utils';
 
-const DEMO_TENANT_ID = process.env.NEXT_PUBLIC_DEMO_TENANT_ID || 'f582c4cf-2f41-48e9-a795-d2f263f6baf1';
+const DEMO_TENANT_ID = 'f582c4cf-2f41-48e9-a795-d2f263f6baf1';
 
 interface Contractor { id: string; name: string; email: string; walletAddress: string; }
 
