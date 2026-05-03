@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { CheckCircle, XCircle, Clock, ExternalLink, RefreshCw, Play, Check } from 'lucide-react';
 import { toast } from '@/components/layout/Toaster';
