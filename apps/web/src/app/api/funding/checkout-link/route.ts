@@ -29,8 +29,8 @@ const TIER_PRODUCTS: Record<string, { productId: string; amountMinor: number; la
     label: '$500 Top-Up',
   },
   custom: {
-    productId: process.env.DODO_PRODUCT_CUSTOM ?? 'prd_1', // Assumes a $1 base product
-    amountMinor: 100,
+    productId: process.env.DODO_PRODUCT_100 ?? 'prd_1', // Fallback to $100 product if custom is missing
+    amountMinor: 10000,
     label: 'Custom Top-Up',
   },
 };
@@ -57,8 +57,8 @@ const SUB_PRODUCTS: Record<string, { productId: string; amountMinor: number; lab
     label: '$500 Monthly Auto-Fund',
   },
   custom: {
-    productId: process.env.DODO_SUB_CUSTOM ?? 'prd_sub_1', // Assumes a $1 base sub product
-    amountMinor: 100,
+    productId: process.env.DODO_SUB_100 ?? 'prd_sub_1', // Fallback to $100 sub product
+    amountMinor: 10000,
     label: 'Custom Monthly Auto-Fund',
   },
 };
@@ -81,9 +81,20 @@ export async function POST(req: NextRequest) {
     const { tenantId, tier, isSubscription, customAmount } = parsed.data;
     const tierInfo = isSubscription ? SUB_PRODUCTS[tier] : TIER_PRODUCTS[tier];
     
-    const finalAmountMinor = tier === 'custom' && customAmount ? customAmount * 100 : tierInfo.amountMinor;
-    const finalLabel = tier === 'custom' && customAmount ? `$${customAmount} ${isSubscription ? 'Monthly ' : ''}Funding` : tierInfo.label;
-    const quantity = tier === 'custom' && customAmount ? customAmount : 1;
+    let finalAmountMinor = tierInfo.amountMinor;
+    let finalLabel = tierInfo.label;
+    let quantity = 1;
+
+    if (tier === 'custom' && customAmount) {
+      // If we are using the fallback ($100 product), quantity = customAmount / 100
+      // If the user has a proper DODO_PRODUCT_CUSTOM (unit price $1), they should update .env
+      const isFallback = !process.env.DODO_PRODUCT_CUSTOM;
+      const unitPrice = isFallback ? 100 : 1;
+      
+      quantity = Math.max(1, Math.floor(customAmount / unitPrice));
+      finalAmountMinor = quantity * unitPrice * 100;
+      finalLabel = `$${quantity * unitPrice} ${isSubscription ? 'Monthly ' : ''}Funding`;
+    }
 
     // Verify tenant exists
     let tenant;
