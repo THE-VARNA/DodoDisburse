@@ -1,8 +1,9 @@
-# Global Contractor Payout Hub
+# DodoDisburse
+**Global Payout Hub · Fiat to Crypto · Solana Settlements**
 
 **Fund via Dodo Payments · Pay contractors instantly via USDC on Solana**
 
-A production-style treasury operations platform for SaaS and AI finance teams.
+A production-style treasury operations platform for global SaaS and AI teams. DodoDisburse bridges traditional fiat funding with high-speed stablecoin settlements, solving the cross-border payroll friction.
 
 ## Architecture
 
