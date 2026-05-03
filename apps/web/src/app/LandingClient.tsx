@@ -73,13 +73,12 @@ export default function LandingClient() {
         }}
       />
 
-      {/* Navigation */}
       <nav style={{ position: 'relative', zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 48px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg, #f59e0b, #fbbf24)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 15px rgba(245,158,11,0.4)' }}>
-            <Diamond size={18} color="#fff" />
+          <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg, #6366f1, #06b6d4)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 15px rgba(99,102,241,0.4)' }}>
+            <Zap size={18} color="#fff" />
           </div>
-          <span style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 800, fontSize: '1.4rem', letterSpacing: '-0.5px', background: 'linear-gradient(to right, #ffffff, #fcd34d)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          <span style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 800, fontSize: '1.4rem', letterSpacing: '-0.5px', background: 'linear-gradient(to right, #ffffff, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             DodoDisburse
           </span>
         </div>
@@ -127,7 +126,7 @@ export default function LandingClient() {
             </div>
           </motion.div>
 
-          <motion.div variants={itemVariants} style={{ display: 'inline-block', padding: '6px 16px', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 100, color: '#fbbf24', fontSize: '0.85rem', fontWeight: 600, marginBottom: 24, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+          <motion.div variants={itemVariants} style={{ display: 'inline-block', padding: '6px 16px', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 100, color: '#818cf8', fontSize: '0.85rem', fontWeight: 600, marginBottom: 24, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
             Powered by Dodo Payments & Solana
           </motion.div>
 
@@ -145,14 +144,14 @@ export default function LandingClient() {
               WebkitTextFillColor: 'transparent',
             }}
           >
-            Fund in Fiat.<br />Payout in Crypto.
+            Global Payroll at<br />Solana Speed.
           </motion.h1>
 
           <motion.p
             variants={itemVariants}
             style={{ fontSize: '1.25rem', color: '#64748b', lineHeight: 1.6, margin: '0 auto 40px', maxWidth: 600 }}
           >
-            The ultimate centralized treasury platform for borderless teams. Fund your account with credit cards instantly, and execute mass USDC payouts globally with near-zero fees.
+            Bridge the gap between Fiat and Web3. Fund your treasury with credit cards instantly via Dodo Payments, and disburse USDC to contractors worldwide on Solana.
           </motion.p>
 
           <motion.div variants={itemVariants} style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>

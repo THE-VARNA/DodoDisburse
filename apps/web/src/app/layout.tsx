@@ -4,7 +4,7 @@ import { SidebarWrapper } from '@/components/layout/SidebarWrapper';
 import { Toaster } from '@/components/layout/Toaster';
 
 export const metadata: Metadata = {
-  title: 'PayHub — Global Contractor Payout Hub',
+  title: 'DodoDisburse — Global Contractor Payout Hub',
   description:
     'Fund via Dodo Payments. Pay contractors instantly via USDC on Solana. Full ledger, reconciliation, and CSV export.',
 };

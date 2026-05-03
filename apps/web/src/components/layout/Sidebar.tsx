@@ -40,7 +40,7 @@ export function Sidebar() {
       }}
     >
       {/* Logo */}
-      <Link href="/dashboard" style={{ textDecoration: 'none', marginBottom: 40 }}>
+      <Link href="/" style={{ textDecoration: 'none', marginBottom: 40 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div
             style={{
@@ -58,7 +58,7 @@ export function Sidebar() {
           </div>
           <div>
             <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: '#f8fafc', letterSpacing: '-0.01em' }}>
-              PayHub
+              DodoDisburse
             </div>
             <div style={{ fontSize: '0.68rem', color: '#475569', marginTop: 1 }}>Contractor Payouts</div>
           </div>
