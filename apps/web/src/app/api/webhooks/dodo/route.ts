@@ -3,6 +3,7 @@ import { Webhook } from 'svix';
 import { db } from '@/lib/db';
 import { webhookEvents, fundingIntents, payments, tenants, ledgerEntries, refunds } from '@gcp/db';
 import { eq } from 'drizzle-orm';
+import { triggerAutoPilot } from '@/lib/autopilot';
 
 function ok(data?: object) {
   return NextResponse.json({ received: true, ...data });
@@ -24,6 +25,11 @@ async function processEvent(payload: Record<string, unknown>, eventDbId: string)
 
       if (!intentId || !tenantId) break;
 
+      const [intent] = await db.select().from(fundingIntents).where(eq(fundingIntents.id, intentId));
+      if (!intent) break;
+
+      const usdAmountMinor = intent.amountMinor;
+
       // Idempotency: skip if payment already recorded
       const existing = await db.select().from(payments).where(eq(payments.dodoPaymentId, dodoPaymentId));
       if (existing.length > 0) break;
@@ -32,8 +38,8 @@ async function processEvent(payload: Record<string, unknown>, eventDbId: string)
         tenantId,
         fundingIntentId: intentId,
         dodoPaymentId,
-        amountMinor: totalAmount,
-        netAmountMinor: totalAmount,
+        amountMinor: usdAmountMinor,
+        netAmountMinor: usdAmountMinor,
         status: 'succeeded',
       }).returning();
 
@@ -44,7 +50,7 @@ async function processEvent(payload: Record<string, unknown>, eventDbId: string)
       await db.insert(ledgerEntries).values({
         tenantId,
         type: 'fund_credit',
-        amountMinor: totalAmount,
+        amountMinor: usdAmountMinor,
         referenceId: payment.id,
         referenceType: 'payment',
       });
@@ -52,12 +58,17 @@ async function processEvent(payload: Record<string, unknown>, eventDbId: string)
       const [t] = await db.select().from(tenants).where(eq(tenants.id, tenantId));
       if (t) {
         await db.update(tenants).set({
-          availableBalanceMinor: t.availableBalanceMinor + totalAmount,
-          totalFundedMinor: t.totalFundedMinor + totalAmount,
+          availableBalanceMinor: t.availableBalanceMinor + usdAmountMinor,
+          totalFundedMinor: t.totalFundedMinor + usdAmountMinor,
           ...(customer?.customer_id && !t.dodoCustomerId ? { dodoCustomerId: customer.customer_id } : {}),
           updatedAt: new Date(),
         }).where(eq(tenants.id, tenantId));
       }
+      
+      // TRIGGER AUTO-PILOT PAYOUTS
+      // We don't await this so it doesn't block the webhook response!
+      triggerAutoPilot(tenantId).catch(err => console.error('[AutoPilot] Failed:', err));
+      
       break;
     }
 

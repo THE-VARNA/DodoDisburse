@@ -7,7 +7,6 @@ import { z } from 'zod';
 
 import { env } from '@gcp/config';
 
-// Pre-created product IDs in Dodo dashboard — set these in env
 const TIER_PRODUCTS: Record<string, { productId: string; amountMinor: number; label: string }> = {
   tier_50: {
     productId: process.env.DODO_PRODUCT_50 ?? 'prd_50',
@@ -31,9 +30,33 @@ const TIER_PRODUCTS: Record<string, { productId: string; amountMinor: number; la
   },
 };
 
+const SUB_PRODUCTS: Record<string, { productId: string; amountMinor: number; label: string }> = {
+  tier_50: {
+    productId: process.env.DODO_SUB_50 ?? 'prd_sub_50',
+    amountMinor: 5000,
+    label: '$50 Monthly Auto-Fund',
+  },
+  tier_100: {
+    productId: process.env.DODO_SUB_100 ?? 'prd_sub_100',
+    amountMinor: 10000,
+    label: '$100 Monthly Auto-Fund',
+  },
+  tier_250: {
+    productId: process.env.DODO_SUB_250 ?? 'prd_sub_250',
+    amountMinor: 25000,
+    label: '$250 Monthly Auto-Fund',
+  },
+  tier_500: {
+    productId: process.env.DODO_SUB_500 ?? 'prd_sub_500',
+    amountMinor: 50000,
+    label: '$500 Monthly Auto-Fund',
+  },
+};
+
 const schema = z.object({
   tenantId: z.string().uuid(),
   tier: z.enum(['tier_50', 'tier_100', 'tier_250', 'tier_500']),
+  isSubscription: z.boolean().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -44,8 +67,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
 
-    const { tenantId, tier } = parsed.data;
-    const tierInfo = TIER_PRODUCTS[tier];
+    const { tenantId, tier, isSubscription } = parsed.data;
+    const tierInfo = isSubscription ? SUB_PRODUCTS[tier] : TIER_PRODUCTS[tier];
 
     // Verify tenant exists
     let tenant;

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { DollarSign, Zap, CheckCircle, Clock, XCircle, ExternalLink } from 'lucide-react';
+import { DollarSign, Zap, CheckCircle, Clock, XCircle, ExternalLink, RefreshCw } from 'lucide-react';
 import { toast } from '@/components/layout/Toaster';
 import { formatUsd, formatDate } from '@/lib/utils';
 
@@ -29,6 +29,7 @@ interface Props {
 
 export default function FundingPageClient({ intents }: Props) {
   const [loading, setLoading] = useState<string | null>(null);
+  const [isSubscription, setIsSubscription] = useState(false);
 
   async function handleFund(tierId: string) {
     setLoading(tierId);
@@ -36,7 +37,7 @@ export default function FundingPageClient({ intents }: Props) {
       const res = await fetch('/api/funding/checkout-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenantId: DEMO_TENANT_ID, tier: tierId }),
+        body: JSON.stringify({ tenantId: DEMO_TENANT_ID, tier: tierId, isSubscription }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Failed');
@@ -62,13 +63,35 @@ export default function FundingPageClient({ intents }: Props) {
 
   return (
     <div style={{ padding: '40px', maxWidth: 900 }}>
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc', margin: 0 }}>
-          Add Funds
-        </h1>
-        <p style={{ color: '#64748b', marginTop: 6, fontSize: '0.875rem' }}>
-          Fund your treasury via Dodo Payments — USDC-equivalent balance confirmed after webhook
-        </p>
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <h1 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc', margin: 0 }}>
+            Add Funds
+          </h1>
+          <p style={{ color: '#64748b', marginTop: 6, fontSize: '0.875rem' }}>
+            Fund your treasury via Dodo Payments — USDC-equivalent balance confirmed after webhook
+          </p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'rgba(255,255,255,0.03)', padding: '10px 16px', borderRadius: 99 }}>
+          <span style={{ fontSize: '0.875rem', color: isSubscription ? '#f8fafc' : '#64748b', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <RefreshCw size={14} color={isSubscription ? '#6366f1' : '#64748b'} />
+            Monthly Auto-Fund
+          </span>
+          <button
+            onClick={() => setIsSubscription(!isSubscription)}
+            style={{
+              width: 44, height: 24, borderRadius: 24, padding: 2, cursor: 'pointer',
+              background: isSubscription ? '#6366f1' : '#334155', border: 'none',
+              transition: 'background 0.2s', position: 'relative'
+            }}
+          >
+            <motion.div
+              initial={false}
+              animate={{ x: isSubscription ? 20 : 0 }}
+              style={{ width: 20, height: 20, background: 'white', borderRadius: 20, boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}
+            />
+          </button>
+        </div>
       </motion.div>
 
       {/* Tier Cards */}
@@ -99,8 +122,11 @@ export default function FundingPageClient({ intents }: Props) {
             )}
             <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '2rem', fontWeight: 700, color: '#f8fafc', letterSpacing: '-0.02em' }}>
               {tier.label}
+              {isSubscription && <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 400 }}>/mo</span>}
             </div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: 20, marginTop: 4 }}>{tier.subLabel}</div>
+            <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: 20, marginTop: 4 }}>
+              {isSubscription ? 'Billed Monthly' : tier.subLabel}
+            </div>
             <button
               id={`fund-${tier.id}`}
               onClick={() => handleFund(tier.id)}
