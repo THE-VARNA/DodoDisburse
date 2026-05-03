@@ -29,7 +29,7 @@ const TIER_PRODUCTS: Record<string, { productId: string; amountMinor: number; la
     label: '$500 Top-Up',
   },
   custom: {
-    productId: process.env.DODO_PRODUCT_100 ?? 'prd_1', // Fallback to $100 product if custom is missing
+    productId: process.env.DODO_PRODUCT_100 ?? 'prd_1', // Fallback to $100 product
     amountMinor: 10000,
     label: 'Custom Top-Up',
   },
@@ -86,76 +86,36 @@ export async function POST(req: NextRequest) {
     let quantity = 1;
 
     if (tier === 'custom' && customAmount) {
-      // If we are using the fallback ($100 product), quantity = customAmount / 100
-      // If the user has a proper DODO_PRODUCT_CUSTOM (unit price $1), they should update .env
       const isFallback = !process.env.DODO_PRODUCT_CUSTOM;
       const unitPrice = isFallback ? 100 : 1;
-      
       quantity = Math.max(1, Math.floor(customAmount / unitPrice));
       finalAmountMinor = quantity * unitPrice * 100;
       finalLabel = `$${quantity * unitPrice} ${isSubscription ? 'Monthly ' : ''}Funding`;
     }
 
-    // Verify tenant exists
-    let tenant;
-    try {
-      const rows = await db.select().from(tenants).where(eq(tenants.id, tenantId));
-      tenant = rows[0];
-    } catch (dbErr: any) {
-      console.error('[checkout-link] DB error fetching tenant:', dbErr?.message ?? dbErr);
-      return NextResponse.json({ error: 'Database unavailable. Please ensure the schema is migrated and the tenant is seeded.' }, { status: 503 });
-    }
+    const rows = await db.select().from(tenants).where(eq(tenants.id, tenantId));
+    const tenant = rows[0];
+    if (!tenant) return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
 
-    if (!tenant) {
-      return NextResponse.json({ error: `Tenant not found: ${tenantId}. Run: node scripts/seed.mjs` }, { status: 404 });
-    }
-
-    // Create funding intent record first
-    let intent;
-    try {
-      const rows = await db
-        .insert(fundingIntents)
-        .values({
-          tenantId,
-          tierLabel: finalLabel,
-          amountMinor: finalAmountMinor,
-          status: 'pending',
-        })
-        .returning();
-      intent = rows[0];
-    } catch (dbErr: any) {
-      console.error('[checkout-link] DB error inserting intent:', dbErr?.message ?? dbErr);
-      return NextResponse.json({ error: 'Failed to create funding intent in database.' }, { status: 503 });
-    }
+    const [intent] = await db.insert(fundingIntents).values({
+      tenantId,
+      tierLabel: finalLabel,
+      amountMinor: finalAmountMinor,
+      status: 'pending',
+    }).returning();
 
     const returnUrl = env.resolvedReturnUrl;
-    const cancelUrl = `${env.resolvedAppUrl}/funding?status=cancelled`;
+    const customerArg = tenant.dodoCustomerId ? { customer_id: tenant.dodoCustomerId } : undefined;
 
-    // Build customer arg: attach existing if we have dodo_customer_id
-    const customerArg = tenant.dodoCustomerId
-      ? { customer_id: tenant.dodoCustomerId }
-      : undefined;
+    const session = await dodo.checkoutSessions.create({
+      product_cart: [{ product_id: tierInfo.productId, quantity }],
+      billing_currency: 'USD',
+      return_url: returnUrl,
+      metadata: { funding_intent_id: intent.id, tenant_id: tenantId },
+      ...(customerArg ? { customer: customerArg } : {}),
+    });
 
-    // Create Dodo checkout session via SDK directly
-    let session;
-    try {
-      session = await dodo.checkoutSessions.create({
-        product_cart: [{ product_id: tierInfo.productId, quantity }],
-        return_url: returnUrl,
-        metadata: {
-          funding_intent_id: intent.id,
-          tenant_id: tenantId,
-        },
-        ...(customerArg ? { customer: customerArg } : {}),
-      });
-    } catch (dodoErr: any) {
-      console.error('[checkout-link] Dodo SDK error:', dodoErr?.message ?? dodoErr);
-      return NextResponse.json({ error: `Dodo Payments error: ${dodoErr?.message ?? 'Unknown error'}` }, { status: 502 });
-    }
-
-    // Store session ID on intent
-    await db
-      .update(fundingIntents)
+    await db.update(fundingIntents)
       .set({ dodoSessionId: session.session_id })
       .where(eq(fundingIntents.id, intent.id));
 
@@ -165,7 +125,7 @@ export async function POST(req: NextRequest) {
       intent_id: intent.id,
     });
   } catch (err: any) {
-    console.error('[checkout-link] Unhandled error:', err?.message ?? err);
-    return NextResponse.json({ error: `Internal server error: ${err?.message ?? 'Unknown'}` }, { status: 500 });
+    console.error('[checkout-link] Error:', err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
