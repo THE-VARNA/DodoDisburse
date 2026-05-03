@@ -22,7 +22,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ it
     const result = await transferUsdc({
       rpcUrl: process.env.SOLANA_RPC_URL ?? 'https://api.devnet.solana.com',
       treasurySecretKey: process.env.SOLANA_TREASURY_SECRET_KEY ?? '',
-      usdcMint: process.env.SOLANA_USDC_MINT ?? 'Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr',
+      usdcMint: 'DUgtqBhTfsxuPULLtabnU5PKjmEDPipJZbxQHjmtmUkG', // Force Mock USDC
       recipientWallet: contractor.walletAddress,
       amountMinor: item.amountMinor,
     });

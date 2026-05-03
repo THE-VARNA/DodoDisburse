@@ -25,7 +25,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ ba
 
   const rpcUrl = process.env.SOLANA_RPC_URL ?? 'https://api.devnet.solana.com';
   const treasuryKey = process.env.SOLANA_TREASURY_SECRET_KEY ?? '';
-  const usdcMint = process.env.SOLANA_USDC_MINT ?? 'Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr';
+  const usdcMint = 'DUgtqBhTfsxuPULLtabnU5PKjmEDPipJZbxQHjmtmUkG'; // Force Mock USDC
 
   let succeeded = 0;
   let failed = 0;
