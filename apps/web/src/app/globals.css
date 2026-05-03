@@ -19,8 +19,8 @@
   --color-danger: #ef4444;
 
   --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #475569;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
 
   --glass-blur: blur(16px);
   --radius-card: 16px;
@@ -77,6 +77,13 @@ body {
 
 .glass-card:hover {
   border-color: var(--border-strong);
+}
+
+.modal-card {
+  background: #0f172a; /* Solid dark blue-slate */
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
 }
 
 /* ── Shimmer Loading ────────────────────────────────────────────────────────── */

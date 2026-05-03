@@ -111,7 +111,7 @@ export default function ContractorsPage() {
         <input
           className="input"
           style={{ paddingLeft: 40 }}
-          placeholder="Search by name or email…"
+          placeholder="Search contractors…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -158,7 +158,7 @@ export default function ContractorsPage() {
             onClick={(e) => { if (e.target === e.currentTarget) setShowAdd(false); }}
           >
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-              className="glass-card" style={{ padding: 32, width: 440 }}
+              className="modal-card" style={{ padding: 32, width: 440 }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
                 <h2 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc', margin: 0 }}>Add Contractor</h2>
@@ -197,7 +197,7 @@ export default function ContractorsPage() {
             onClick={(e) => { if (e.target === e.currentTarget) setShowImport(false); }}
           >
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-              className="glass-card" style={{ padding: 32, width: 440 }}
+              className="modal-card" style={{ padding: 32, width: 440 }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
                 <h2 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc', margin: 0 }}>Import CSV</h2>

@@ -13,6 +13,7 @@ export default async function DashboardPage() {
   let tenant = null;
   let recentIntents: typeof fundingIntents.$inferSelect[] = [];
   let recentBatches: typeof payoutBatches.$inferSelect[] = [];
+  let recentActivity: typeof ledgerEntries.$inferSelect[] = [];
 
   try {
     if (DEMO_TENANT_ID) {
@@ -30,6 +31,13 @@ export default async function DashboardPage() {
         .where(eq(payoutBatches.tenantId, DEMO_TENANT_ID))
         .orderBy(desc(payoutBatches.createdAt))
         .limit(5);
+
+      recentActivity = await db
+        .select()
+        .from(ledgerEntries)
+        .where(eq(ledgerEntries.tenantId, DEMO_TENANT_ID))
+        .orderBy(desc(ledgerEntries.createdAt))
+        .limit(8);
 
       // Calculate dynamic reserved balance (sum of all approved or executing batches)
       const activeBatches = await db
@@ -55,6 +63,7 @@ export default async function DashboardPage() {
       tenant={tenant}
       recentIntents={recentIntents}
       recentBatches={recentBatches}
+      activities={recentActivity}
     />
   );
 }

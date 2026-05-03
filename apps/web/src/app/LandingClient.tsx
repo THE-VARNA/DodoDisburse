@@ -88,7 +88,7 @@ export default function LandingClient() {
       </nav>
 
       {/* Hero Section */}
-      <main style={{ position: 'relative', zIndex: 10, maxWidth: 1200, margin: '0 auto', padding: '100px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <main style={{ position: 'relative', zIndex: 10, maxWidth: 1200, margin: '0 auto', padding: '60px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -174,7 +174,7 @@ export default function LandingClient() {
               <CreditCard size={24} color="#818cf8" />
             </div>
             <h3 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.3rem', margin: '0 0 12px', color: '#f8fafc' }}>Frictionless Funding</h3>
-            <p style={{ color: '#64748b', lineHeight: 1.6, margin: 0 }}>
+            <p style={{ color: '#94a3b8', lineHeight: 1.6, margin: 0 }}>
               Use Dodo Payments to checkout via credit cards, Apple Pay, or standard fiat rails. Webhooks automatically credit your secure immutable ledger.
             </p>
           </motion.div>
@@ -184,7 +184,7 @@ export default function LandingClient() {
               <Zap size={24} color="#34d399" />
             </div>
             <h3 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.3rem', margin: '0 0 12px', color: '#f8fafc' }}>Solana Speed</h3>
-            <p style={{ color: '#64748b', lineHeight: 1.6, margin: 0 }}>
+            <p style={{ color: '#94a3b8', lineHeight: 1.6, margin: 0 }}>
               Batch process thousands of contractor payouts using SPL Token instructions. Near-instant finality and virtually zero gas fees on the Solana network.
             </p>
           </motion.div>
@@ -194,7 +194,7 @@ export default function LandingClient() {
               <Shield size={24} color="#fb7185" />
             </div>
             <h3 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.3rem', margin: '0 0 12px', color: '#f8fafc' }}>Treasury Security</h3>
-            <p style={{ color: '#64748b', lineHeight: 1.6, margin: 0 }}>
+            <p style={{ color: '#94a3b8', lineHeight: 1.6, margin: 0 }}>
               Custodial backend wallet isolates smart contract risk. Centralized PostgreSQL ledger ensures balances are accurately reserved before dual-execution.
             </p>
           </motion.div>

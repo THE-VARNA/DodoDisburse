@@ -16,7 +16,7 @@ const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/funding', label: 'Funding', icon: CreditCard },
   { href: '/contractors', label: 'Contractors', icon: Users },
-  { href: '/batches/new', label: 'New Batch', icon: Send },
+  { href: '/batches', label: 'Payout Batches', icon: Send },
   { href: '/reports', label: 'Reports', icon: BarChart3 },
 ];
 

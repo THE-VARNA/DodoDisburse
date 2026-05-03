@@ -28,6 +28,13 @@ interface Props {
     status: string;
     createdAt: Date;
   }>;
+  activities: Array<{
+    id: string;
+    type: string;
+    amountMinor: number;
+    referenceType: string;
+    createdAt: Date;
+  }>;
 }
 
 const stagger = { container: { hidden: {}, show: { transition: { staggerChildren: 0.07 } } }, item: { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } } };
@@ -46,7 +53,7 @@ function statusBadgeClass(status: string) {
   return 'badge badge-info';
 }
 
-export function DashboardClient({ tenant, recentIntents, recentBatches }: Props) {
+export function DashboardClient({ tenant, recentIntents, recentBatches, activities }: Props) {
   const balanceCards = [
     {
       label: 'Available Balance',
@@ -207,6 +214,48 @@ export function DashboardClient({ tenant, recentIntents, recentBatches }: Props)
           )}
         </motion.div>
       </div>
+
+      {/* System Activity Feed */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} className="glass-card" style={{ marginTop: 24, padding: 24 }}>
+        <h2 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#94a3b8', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Zap size={14} color="#6366f1" /> System Activity Log
+        </h2>
+        {activities.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '24px 0', color: '#334155', fontSize: '0.875rem' }}>
+            No activity logged yet
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {activities.map((act) => (
+              <div key={act.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '8px 12px', borderRadius: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ 
+                    width: 8, height: 8, borderRadius: '50%', 
+                    background: act.type === 'fund_credit' ? '#10b981' : act.type === 'reserve' ? '#f59e0b' : '#6366f1' 
+                  }} />
+                  <div>
+                    <div style={{ fontSize: '0.85rem', color: '#e2e8f0' }}>
+                      {act.type === 'fund_credit' ? 'Dodo Webhook: Treasury Funded' :
+                       act.type === 'reserve' ? 'Funds Reserved for Batch' :
+                       act.type === 'payout_debit' ? 'Solana Transfer: Payout Executed' :
+                       act.type === 'reserve_release' ? 'Reserve Released' : 'System Event'}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#475569' }}>
+                      {act.referenceType.replace('_', ' ')} · {formatDate(act.createdAt)}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ 
+                  fontFamily: 'Space Grotesk, sans-serif', fontSize: '0.875rem', fontWeight: 600,
+                  color: act.amountMinor > 0 ? '#34d399' : '#f87171' 
+                }}>
+                  {act.amountMinor > 0 ? '+' : ''}{formatUsd(act.amountMinor)}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </motion.div>
     </div>
   );
 }

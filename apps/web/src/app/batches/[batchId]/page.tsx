@@ -81,6 +81,13 @@ export default function BatchDetailPage() {
   return (
     <div style={{ padding: 40, maxWidth: 1000 }}>
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+        {/* Breadcrumb */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, fontSize: '0.8rem', color: '#64748b' }}>
+          <Link href="/batches" style={{ color: '#64748b', textDecoration: 'none' }}>Payout Batches</Link>
+          <span>/</span>
+          <span style={{ color: '#94a3b8' }}>Batch Details</span>
+        </div>
+
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
@@ -115,8 +122,25 @@ export default function BatchDetailPage() {
         </div>
       </motion.div>
 
+      {/* Lifecycle Timeline */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} style={{ marginTop: 32, display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div style={{ flex: 1, height: 2, background: 'rgba(255,255,255,0.1)', position: 'relative' }}>
+          <div style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: 20, height: 20, borderRadius: '50%', background: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.7rem' }}>1</div>
+          <div style={{ position: 'absolute', left: 0, top: 24, fontSize: '0.75rem', color: '#f8fafc', fontWeight: 600 }}>Draft</div>
+        </div>
+        <div style={{ flex: 1, height: 2, background: (batch.status !== 'draft') ? '#6366f1' : 'rgba(255,255,255,0.1)', position: 'relative' }}>
+          <div style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: 20, height: 20, borderRadius: '50%', background: (batch.status !== 'draft') ? '#6366f1' : '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.7rem' }}>2</div>
+          <div style={{ position: 'absolute', left: 0, top: 24, fontSize: '0.75rem', color: (batch.status !== 'draft') ? '#f8fafc' : '#475569', fontWeight: 600 }}>Approved</div>
+        </div>
+        <div style={{ flex: 1, height: 2, background: (batch.status === 'completed' || batch.status === 'succeeded' || batch.status === 'partial') ? '#10b981' : 'rgba(255,255,255,0.1)', position: 'relative' }}>
+          <div style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: 20, height: 20, borderRadius: '50%', background: (batch.status === 'completed' || batch.status === 'succeeded' || batch.status === 'partial') ? '#10b981' : '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.7rem' }}>3</div>
+          <div style={{ position: 'absolute', left: 0, top: 24, fontSize: '0.75rem', color: (batch.status === 'completed' || batch.status === 'succeeded' || batch.status === 'partial') ? '#f8fafc' : '#475569', fontWeight: 600 }}>Executed</div>
+        </div>
+      </motion.div>
+
+
       {/* Items table */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="glass-card" style={{ marginTop: 32, padding: 0, overflow: 'hidden' }}>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="glass-card" style={{ marginTop: 64, padding: 0, overflow: 'hidden' }}>
         <table className="data-table">
           <thead><tr>
             <th>Contractor</th><th>Wallet</th><th>Amount</th><th>Status</th><th>TX Signature</th><th></th>
