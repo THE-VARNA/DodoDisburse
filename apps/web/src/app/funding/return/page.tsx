@@ -1,18 +1,29 @@
 'use client';
 
 import { Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { motion } from 'motion/react';
 import { CheckCircle, Clock, XCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 function ReturnContent() {
   const params = useSearchParams();
+  const router = useRouter();
   const paymentId = params.get('payment_id');
   const status = params.get('status');
 
   const isSuccess = status === 'succeeded' || !!paymentId;
   const isCancelled = !paymentId && status === 'cancelled';
+
+  useEffect(() => {
+    if (isSuccess) {
+      const timer = setTimeout(() => {
+        router.push('/dashboard');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess, router]);
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: 40 }}>
@@ -41,10 +52,13 @@ function ReturnContent() {
               Payment Received
             </h1>
             <p style={{ color: '#64748b', fontSize: '0.875rem', margin: '0 0 8px' }}>
-              Awaiting webhook confirmation from Dodo Payments.
+              Confirmed! Redirecting to your dashboard...
             </p>
+            <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0' }}>
+               <div className="loading-spinner" style={{ width: 24, height: 24 }}></div>
+            </div>
             <p style={{ color: '#475569', fontSize: '0.75rem', margin: '0 0 32px' }}>
-              Your balance will update automatically once confirmed — usually within seconds.
+              Your balance will update automatically within seconds.
             </p>
             {paymentId && (
               <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '10px 16px', marginBottom: 24 }}>
