@@ -1,6 +1,6 @@
 import { db } from '@/lib/db';
 import { tenants, fundingIntents, payoutBatches, ledgerEntries } from '@gcp/db';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and, or } from 'drizzle-orm';
 import { DashboardClient } from './DashboardClient';
 
 // Demo tenant ID — seeded on first run
@@ -30,6 +30,21 @@ export default async function DashboardPage() {
         .where(eq(payoutBatches.tenantId, DEMO_TENANT_ID))
         .orderBy(desc(payoutBatches.createdAt))
         .limit(5);
+
+      // Calculate dynamic reserved balance (sum of all approved or executing batches)
+      const activeBatches = await db
+        .select({ totalAmountMinor: payoutBatches.totalAmountMinor })
+        .from(payoutBatches)
+        .where(and(
+          eq(payoutBatches.tenantId, DEMO_TENANT_ID),
+          or(eq(payoutBatches.status, 'approved'), eq(payoutBatches.status, 'executing'))
+        ));
+      
+      const dynamicReservedMinor = activeBatches.reduce((sum, b) => sum + b.totalAmountMinor, 0);
+      
+      if (tenant) {
+        tenant.reservedBalanceMinor = dynamicReservedMinor;
+      }
     }
   } catch {
     // DB not yet migrated — show empty state
