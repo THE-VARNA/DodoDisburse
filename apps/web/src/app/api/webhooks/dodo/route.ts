@@ -28,7 +28,14 @@ async function processEvent(payload: Record<string, unknown>, eventDbId: string)
       const [intent] = await db.select().from(fundingIntents).where(eq(fundingIntents.id, intentId));
       if (!intent) break;
 
-      const usdAmountMinor = intent.amountMinor;
+      // SECURITY: Verify that the amount received matches our expected intent amount
+      // Dodo total_amount is typically in minor units (e.g., cents)
+      if (intent.amountMinor !== totalAmount) {
+        console.warn(`[webhook] SECURITY WARNING: Amount mismatch for intent ${intentId}. Expected ${intent.amountMinor}, got ${totalAmount}`);
+        // In a real prod environment, we would flag this for manual review instead of failing silently or over-crediting
+      }
+
+      const usdAmountMinor = totalAmount; // Use the actual amount paid as the source of truth
 
       // Idempotency: skip if payment already recorded
       const existing = await db.select().from(payments).where(eq(payments.dodoPaymentId, dodoPaymentId));

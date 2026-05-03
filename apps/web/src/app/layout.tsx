@@ -9,6 +9,8 @@ export const metadata: Metadata = {
     'Fund via Dodo Payments. Pay contractors instantly via USDC on Solana. Full ledger, reconciliation, and CSV export.',
 };
 
+import { WalletContextProvider } from '@/components/providers/WalletContextProvider';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -17,13 +19,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body>
-        <div className="flex min-h-screen">
-          <SidebarWrapper />
-          <main className="flex-1 min-w-0 flex flex-col">
-            {children}
-          </main>
-        </div>
-        <Toaster />
+        <WalletContextProvider>
+          <div className="flex min-h-screen">
+            <SidebarWrapper />
+            <main className="flex-1 min-w-0 flex flex-col">
+              {children}
+            </main>
+          </div>
+          <Toaster />
+        </WalletContextProvider>
       </body>
     </html>
   );

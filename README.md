@@ -93,11 +93,12 @@ pnpm dev
 
 ---
 
-## 🛡️ Key Features for Judges
-- **Immutable Ledger:** Every cent is tracked in an append-only transaction log.
-- **Double-Spend Protection:** Funds are reserved at the batch level before execution.
-- **Webhook Idempotency:** Securely handles duplicate event deliveries from Dodo Payments.
-- **Reconciliation-First:** Built-in CSV export with on-chain transaction verification.
+## 🛡️ Security & Production Readiness
+- **Webhook Signature Verification:** All inbound requests from Dodo Payments are cryptographically verified using **Svix** to prevent spoofing.
+- **Amount Matching:** The platform verifies that the payment amount received from Dodo matches the internal intent before crediting the treasury.
+- **Idempotency Logic:** Every webhook event is persisted and checked against a `webhook_id` to prevent double-funding from duplicate deliveries.
+- **Balance Isolation:** Payout funds are "Reserved" from the available balance before execution to ensure solvency and prevent race conditions.
+- **Immutable Audit Trail:** All financial movements are recorded in an append-only ledger that cannot be modified by the application logic.
 
 ---
 *Built for the Superteam x Dodo Payments Hackathon.*

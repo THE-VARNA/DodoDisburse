@@ -9,6 +9,14 @@ import {
   Send,
   BarChart3,
   Zap,
+  CheckCircle,
+  XCircle,
+  Clock,
+  ExternalLink,
+  RefreshCw,
+  Play,
+  Check,
+  Shield,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -95,15 +103,62 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Footer */}
+      {/* Wallet Connection */}
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 16, marginTop: 16 }}>
-        <div style={{ fontSize: '0.72rem', color: '#334155' }}>
+        <div style={{ marginBottom: 12 }}>
+          <DynamicWalletButton />
+        </div>
+        <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
           Solana Devnet · USDC
         </div>
-        <div style={{ fontSize: '0.68rem', color: '#1e293b', marginTop: 2 }}>
-          Powered by Dodo Payments
+        <div style={{ fontSize: '0.68rem', color: '#475569', marginTop: 2 }}>
+          Treasury Admin Auth
         </div>
       </div>
     </aside>
+  );
+}
+
+import dynamic from 'next/dynamic';
+const WalletMultiButtonDynamic = dynamic(
+  async () => (await import('@solana/wallet-adapter-react-ui')).WalletMultiButton,
+  { ssr: false }
+);
+
+function DynamicWalletButton() {
+  return (
+    <div className="wallet-btn-wrapper">
+      <WalletMultiButtonDynamic 
+        style={{ 
+          background: 'rgba(99,102,241,0.1)', 
+          border: '1px solid rgba(99,102,241,0.2)',
+          borderRadius: 8,
+          fontSize: '0.75rem',
+          height: 36,
+          padding: '0 12px',
+          width: '100%',
+          justifyContent: 'center',
+          color: '#818cf8',
+          fontFamily: 'inherit'
+        }} 
+      />
+      <style dangerouslySetInnerHTML={{ __html: `
+        .wallet-btn-wrapper .wallet-adapter-button-trigger {
+          background: rgba(99,102,241,0.1) !important;
+          border: 1px solid rgba(99,102,241,0.2) !important;
+          width: 100% !important;
+          height: 36px !important;
+          line-height: 36px !important;
+          font-size: 0.75rem !important;
+          font-weight: 500 !important;
+          border-radius: 8px !important;
+          transition: all 0.2s !important;
+        }
+        .wallet-btn-wrapper .wallet-adapter-button-trigger:hover {
+          background: rgba(99,102,241,0.2) !important;
+          border-color: rgba(99,102,241,0.4) !important;
+        }
+      `}} />
+    </div>
   );
 }

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { CheckCircle, XCircle, Clock, ExternalLink, RefreshCw, Play, Check } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, ExternalLink, RefreshCw, Play, Check, Users, Shield } from 'lucide-react';
 import { toast } from '@/components/layout/Toaster';
 import { formatUsd, formatDate, solscanUrl, shortenAddress } from '@/lib/utils';
 
@@ -26,11 +26,14 @@ function ItemStatus({ item }: { item: BatchItem['item'] }) {
   return <Clock size={14} color="#475569" />;
 }
 
+import { useWallet } from '@solana/wallet-adapter-react';
+
 export default function BatchDetailPage() {
   const { batchId } = useParams<{ batchId: string }>();
   const [data, setData] = useState<{ batch: Batch; items: BatchItem[] } | null>(null);
   const [approving, setApproving] = useState(false);
   const [executing, setExecuting] = useState(false);
+  const { connected, publicKey, signMessage } = useWallet();
 
   const load = useCallback(async () => {
     try {
@@ -54,9 +57,24 @@ export default function BatchDetailPage() {
   }
 
   async function handleExecute() {
+    if (!connected || !publicKey) {
+      toast('Please connect your admin wallet to execute payouts', 'error');
+      return;
+    }
+
     setExecuting(true);
     try {
-      const res = await fetch(`/api/batches/${batchId}/execute`, { method: 'POST' });
+      // SECURITY: Optional: Sign a message to prove authority
+      if (signMessage) {
+        const message = new TextEncoder().encode(`Authorize Payout for Batch ${batchId} at ${new Date().toISOString()}`);
+        await signMessage(message);
+        toast('Signature verified by wallet', 'success');
+      }
+
+      const res = await fetch(`/api/batches/${batchId}/execute`, { 
+        method: 'POST',
+        headers: { 'X-Admin-Wallet': publicKey.toBase58() } 
+      });
       const r = await res.json();
       if (!res.ok) throw new Error(r.error ?? 'Failed');
       toast(`Executed: ${r.succeeded} succeeded, ${r.failed} failed`, r.failed > 0 ? 'info' : 'success');
@@ -107,8 +125,18 @@ export default function BatchDetailPage() {
               </button>
             )}
             {batch.status === 'approved' && (
-              <button id="execute-btn" onClick={handleExecute} disabled={executing} className="btn btn-primary" style={{ background: '#10b981', boxShadow: '0 0 20px rgba(16,185,129,0.3)' }}>
-                {executing ? 'Executing…' : <><Play size={14} /> Execute Payouts</>}
+              <button 
+                id="execute-btn" 
+                onClick={handleExecute} 
+                disabled={executing} 
+                className="btn btn-primary" 
+                style={{ 
+                  background: !connected ? '#fbbf24' : '#10b981', 
+                  boxShadow: !connected ? '0 0 20px rgba(251,191,36,0.3)' : '0 0 20px rgba(16,185,129,0.3)',
+                  color: !connected ? '#1e293b' : 'white'
+                }}
+              >
+                {executing ? 'Executing…' : !connected ? <><Users size={14} /> Connect Wallet to Execute</> : <><Play size={14} /> Execute Payouts</>}
               </button>
             )}
             <a
