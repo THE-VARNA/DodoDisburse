@@ -28,6 +28,11 @@ const TIER_PRODUCTS: Record<string, { productId: string; amountMinor: number; la
     amountMinor: 50000,
     label: '$500 Top-Up',
   },
+  custom: {
+    productId: process.env.DODO_PRODUCT_CUSTOM ?? 'prd_1', // Assumes a $1 base product
+    amountMinor: 100,
+    label: 'Custom Top-Up',
+  },
 };
 
 const SUB_PRODUCTS: Record<string, { productId: string; amountMinor: number; label: string }> = {
@@ -51,12 +56,18 @@ const SUB_PRODUCTS: Record<string, { productId: string; amountMinor: number; lab
     amountMinor: 50000,
     label: '$500 Monthly Auto-Fund',
   },
+  custom: {
+    productId: process.env.DODO_SUB_CUSTOM ?? 'prd_sub_1', // Assumes a $1 base sub product
+    amountMinor: 100,
+    label: 'Custom Monthly Auto-Fund',
+  },
 };
 
 const schema = z.object({
   tenantId: z.string().uuid(),
-  tier: z.enum(['tier_50', 'tier_100', 'tier_250', 'tier_500']),
+  tier: z.enum(['tier_50', 'tier_100', 'tier_250', 'tier_500', 'custom']),
   isSubscription: z.boolean().optional(),
+  customAmount: z.number().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -67,8 +78,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
 
-    const { tenantId, tier, isSubscription } = parsed.data;
+    const { tenantId, tier, isSubscription, customAmount } = parsed.data;
     const tierInfo = isSubscription ? SUB_PRODUCTS[tier] : TIER_PRODUCTS[tier];
+    
+    const finalAmountMinor = tier === 'custom' && customAmount ? customAmount * 100 : tierInfo.amountMinor;
+    const finalLabel = tier === 'custom' && customAmount ? `$${customAmount} ${isSubscription ? 'Monthly ' : ''}Funding` : tierInfo.label;
+    const quantity = tier === 'custom' && customAmount ? customAmount : 1;
 
     // Verify tenant exists
     let tenant;
@@ -91,8 +106,8 @@ export async function POST(req: NextRequest) {
         .insert(fundingIntents)
         .values({
           tenantId,
-          tierLabel: tierInfo.label,
-          amountMinor: tierInfo.amountMinor,
+          tierLabel: finalLabel,
+          amountMinor: finalAmountMinor,
           status: 'pending',
         })
         .returning();
@@ -114,7 +129,7 @@ export async function POST(req: NextRequest) {
     let session;
     try {
       session = await dodo.checkoutSessions.create({
-        product_cart: [{ product_id: tierInfo.productId, quantity: 1 }],
+        product_cart: [{ product_id: tierInfo.productId, quantity }],
         return_url: returnUrl,
         metadata: {
           funding_intent_id: intent.id,

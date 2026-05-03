@@ -11,8 +11,8 @@ const DEMO_TENANT_ID = 'f582c4cf-2f41-48e9-a795-d2f263f6baf1';
 const TIERS = [
   { id: 'tier_50', label: '$50', subLabel: 'Quick Top-Up', amountMinor: 5000, popular: false },
   { id: 'tier_100', label: '$100', subLabel: 'Standard', amountMinor: 10000, popular: true },
-  { id: 'tier_250', label: '$250', subLabel: 'Growth', amountMinor: 25000, popular: false },
   { id: 'tier_500', label: '$500', subLabel: 'Enterprise', amountMinor: 50000, popular: false },
+  { id: 'custom', label: 'Custom', subLabel: 'Any Amount', amountMinor: 0, popular: false },
 ];
 
 interface Intent {
@@ -30,14 +30,25 @@ interface Props {
 export default function FundingPageClient({ intents }: Props) {
   const [loading, setLoading] = useState<string | null>(null);
   const [isSubscription, setIsSubscription] = useState(false);
+  const [customAmount, setCustomAmount] = useState<string>('1000');
 
   async function handleFund(tierId: string) {
     setLoading(tierId);
     try {
+      const amount = tierId === 'custom' ? parseInt(customAmount) : undefined;
+      if (tierId === 'custom' && (!amount || amount < 10)) {
+        throw new Error('Minimum custom amount is $10');
+      }
+
       const res = await fetch('/api/funding/checkout-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenantId: DEMO_TENANT_ID, tier: tierId, isSubscription }),
+        body: JSON.stringify({ 
+          tenantId: DEMO_TENANT_ID, 
+          tier: tierId, 
+          isSubscription,
+          customAmount: amount 
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Failed');
@@ -120,8 +131,29 @@ export default function FundingPageClient({ intents }: Props) {
                 Popular
               </div>
             )}
-            <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '2rem', fontWeight: 700, color: '#f8fafc', letterSpacing: '-0.02em' }}>
-              {tier.label}
+            <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: tier.id === 'custom' ? '1.5rem' : '2rem', fontWeight: 700, color: '#f8fafc', letterSpacing: '-0.02em' }}>
+              {tier.id === 'custom' ? (
+                <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                  <span style={{ fontSize: '1rem', color: '#64748b', marginRight: 4 }}>$</span>
+                  <input 
+                    type="number" 
+                    value={customAmount} 
+                    onChange={(e) => setCustomAmount(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ 
+                      background: 'rgba(255,255,255,0.05)', 
+                      border: '1px solid rgba(255,255,255,0.1)', 
+                      borderRadius: 8, 
+                      color: 'white', 
+                      width: 80, 
+                      fontSize: '1.25rem', 
+                      padding: '4px 8px',
+                      textAlign: 'center',
+                      outline: 'none'
+                    }} 
+                  />
+                </div>
+              ) : tier.label}
               {isSubscription && <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 400 }}>/mo</span>}
             </div>
             <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: 20, marginTop: 4 }}>
@@ -129,7 +161,7 @@ export default function FundingPageClient({ intents }: Props) {
             </div>
             <button
               id={`fund-${tier.id}`}
-              onClick={() => handleFund(tier.id)}
+              onClick={(e) => { e.stopPropagation(); handleFund(tier.id); }}
               disabled={!!loading}
               className="btn btn-primary"
               style={{ width: '100%', justifyContent: 'center', fontSize: '0.8rem' }}
@@ -137,7 +169,7 @@ export default function FundingPageClient({ intents }: Props) {
               {loading === tier.id ? (
                 <><span className="shimmer" style={{ width: 60, height: 14, borderRadius: 4, display: 'inline-block' }} /></>
               ) : (
-                <><Zap size={13} /> Fund {tier.label}</>
+                <><Zap size={13} /> Fund {tier.id === 'custom' ? `$${customAmount}` : tier.label}</>
               )}
             </button>
           </div>
