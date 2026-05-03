@@ -1,97 +1,103 @@
 # DodoDisburse
 **Global Payout Hub · Fiat to Crypto · Solana Settlements**
 
-**Fund via Dodo Payments · Pay contractors instantly via USDC on Solana**
+**DodoDisburse** is a production-grade treasury operations platform that bridges traditional fiat funding with high-speed stablecoin settlements. Designed for global SaaS and AI teams, it eliminates the friction of cross-border contractor payroll by combining the compliance and reach of **Dodo Payments** with the instant settlement power of **Solana**.
 
-A production-style treasury operations platform for global SaaS and AI teams. DodoDisburse bridges traditional fiat funding with high-speed stablecoin settlements, solving the cross-border payroll friction.
+---
 
-## Architecture
+## 🚀 What is DodoDisburse?
+DodoDisburse serves as a unified command center for international finance teams. It allows companies to fund their corporate treasury using local payment methods (Cards, Bank Transfers, UPI) and instantly disburse those funds to a global workforce using USDC on Solana.
 
+---
+
+## 🛠️ How it Works
+1.  **Fund:** The company tops up their treasury via a Dodo Payments checkout session ($USD).
+2.  **Verify:** A webhook confirms the payment and credits the internal ledger.
+3.  **Batch:** The treasurer creates a payout batch for contractors.
+4.  **Execute:** Funds are disbursed via SPL tokens on the Solana network in seconds.
+5.  **Reconcile:** All transactions are logged and exportable for accounting.
+
+---
+
+## 🔄 Core Flows
+- **Fiat-to-Treasury Bridge:** Seamlessly convert fiat into a digital treasury balance via Dodo Payments.
+- **Contractor Lifecycle:** Manage contractor wallets, emails, and payment tiers in a central directory.
+- **Automated Payout Batches:** Group multiple contractor payments into a single approval workflow.
+- **Real-time Observability:** Track every webhook, reservation, and transfer through a live System Activity Feed.
+
+---
+
+## 💼 Use Cases
+- **Global AI Startups:** Pay distributed researchers and engineers in USDC instantly.
+- **SaaS Platforms:** Manage international marketing and support contractor payroll.
+- **Web3 Foundations:** Simplify grant distributions and contributor rewards.
+- **Cross-border E-commerce:** Pay global vendors and logistics partners without wire fees.
+
+---
+
+## 🏗️ Technology Stack
 | Layer | Technology |
 |-------|-----------|
-| Frontend + API | Next.js 16 App Router |
-| Database | Neon Postgres + Drizzle ORM |
-| Inbound billing | Dodo Payments (checkout sessions + webhooks) |
-| Outbound payouts | Solana devnet · USDC SPL token |
-| Monorepo | pnpm workspaces |
+| **Frontend** | Next.js 16 (App Router), Tailwind CSS |
+| **Logic** | TypeScript, Drizzle ORM |
+| **Database** | Neon Postgres (Serverless) |
+| **Fiat Rail** | Dodo Payments (Checkout + Webhooks) |
+| **Settlement** | Solana Devnet (USDC SPL Tokens) |
+| **Animations** | Motion (framer-motion) |
 
-```
-apps/web        → Next.js app (UI + all API routes)
-apps/worker     → Standalone payout worker (future)
-packages/config → Zod env validation
-packages/db     → Drizzle schema + Neon client
-packages/solana → SPL USDC transfer helpers
-```
+---
 
-## Quick Start
+## 🏁 Getting Started
 
-### 1. Install dependencies
+### 1. Prerequisites
+- Node.js 20+ and pnpm
+- Dodo Payments Developer Account
+- Solana CLI (for treasury keypair management)
+
+### 2. Installation
 ```bash
 pnpm install
 ```
 
-### 2. Configure environment
+### 3. Environment Setup
+Copy the example environment file and fill in your credentials:
 ```bash
 cp .env.example apps/web/.env.local
-# Fill in all values
 ```
 
-### 3. Run database migrations
+### 4. Database Setup
+Push the schema to your Neon instance:
 ```bash
 pnpm db:push
 ```
 
-### 4. Seed demo data
+### 5. Initialize Demo
+Seed the demo tenant and contractors:
 ```bash
-DATABASE_URL=your_url node scripts/seed.mjs
-# Copy DEMO_TENANT_ID output → apps/web/.env.local
+pnpm seed
 ```
 
-### 5. Start dev server
+### 6. Run the App
 ```bash
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+---
 
-## Core User Flow
+## 📜 Available Scripts
+- `pnpm dev`: Start the Next.js development server.
+- `pnpm build`: Build the application for production.
+- `pnpm db:push`: Sync the Drizzle schema with the database.
+- `pnpm seed`: Run the database seeding script for demo data.
+- `pnpm typecheck`: Run TypeScript compiler check.
 
-1. **Fund** → Click a tier on `/funding` → Dodo hosted checkout → webhook credits ledger
-2. **Add Contractors** → `/contractors` → manual add or CSV import
-3. **Create Batch** → `/batches/new` → select contractors + set USDC amounts
-4. **Approve** → reserves balance (prevents double-spend)
-5. **Execute** → SPL transfers sent on-chain → TX signatures stored
-6. **Export** → `/reports` → CSV reconciliation with Solscan links
+---
 
-## Webhook Setup (Dodo Dashboard)
+## 🛡️ Key Features for Judges
+- **Immutable Ledger:** Every cent is tracked in an append-only transaction log.
+- **Double-Spend Protection:** Funds are reserved at the batch level before execution.
+- **Webhook Idempotency:** Securely handles duplicate event deliveries from Dodo Payments.
+- **Reconciliation-First:** Built-in CSV export with on-chain transaction verification.
 
-Navigate: **Developer → Webhooks → Add Endpoint**
-
-URL: `https://your-domain.com/api/webhooks/dodo`
-
-Subscribe to:
-- `payment.succeeded`
-- `payment.failed`
-- `payment.processing`
-- `payment.cancelled`
-- `refund.succeeded`
-- `refund.failed`
-
-## Treasury Wallet Setup
-
-Generate a Solana keypair and fund it with devnet USDC:
-```bash
-solana-keygen new --outfile treasury.json
-solana airdrop 2 $(solana-keygen pubkey treasury.json) --url devnet
-# Then get devnet USDC from the USDC devnet faucet
-```
-
-Export the secret key as base58 and set `SOLANA_TREASURY_SECRET_KEY`.
-
-## Key Design Decisions
-
-- **Webhook idempotency**: `webhook-id` header used as unique key — duplicate deliveries safely ignored
-- **Balance reservation**: funds locked before batch execution — prevents double-spend
-- **Ledger**: immutable append-only `ledger_entries` table — complete audit trail
-- **Refund direction**: `refund_debit` reduces tenant balance (money returns to card)
-- **BigInt safety**: SPL amounts converted to `BigInt` right at the transfer call
+---
+*Built for the Superteam x Dodo Payments Hackathon.*
