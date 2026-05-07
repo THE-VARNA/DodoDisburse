@@ -85,7 +85,7 @@ export default function NewBatchPage() {
           <div className="glass-card" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
               <label style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginBottom: 6 }}>Batch Label *</label>
-              <input id="batch-label" className="input" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="May 2025 Payout" />
+              <input id="batch-label" className="input" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="May 2026 Payout" />
             </div>
             <div>
               <label style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginBottom: 6 }}>Note</label>
