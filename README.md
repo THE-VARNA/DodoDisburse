@@ -1,49 +1,63 @@
-# DodoDisburse
+# 🦤 DodoDisburse
 **Global Payout Hub · Fiat to Crypto · Solana Settlements**
 
-**DodoDisburse** is a production-grade treasury operations platform that bridges traditional fiat funding with high-speed stablecoin settlements. Designed for global SaaS and AI teams, it eliminates the friction of cross-border contractor payroll by combining the compliance and reach of **Dodo Payments** with the instant settlement power of **Solana**.
+[![Built for Hackathon](https://img.shields.io/badge/Built_for-Superteam_x_Dodo_Payments-6366f1?style=for-the-badge)](https://dodopayments.com)
+[![Solana](https://img.shields.io/badge/Powered_by-Solana-14F195?style=for-the-badge&logo=solana&logoColor=black)](#)
+
+DodoDisburse is a unified financial command center providing Cross-Border Payments for Businesses — helping SaaS, AI-native, and creator platforms pay contractors and teams globally without wire fees or banking friction.
+
+Companies fund their treasury using local fiat methods (Cards, Bank Transfers, UPI) via Dodo Payments. DodoDisburse leverages a pre-funded Solana USDC treasury. 
+
+The moment a fiat top-up succeeds, our system instantly allocates the equivalent USDC balance to your account, enabling finance teams to execute 1-click global payouts. The result? Traditional fiat compliance on the front-end, combined with sub-second, frictionless crypto settlement on the back-end.
 
 ---
 
-## 🚀 What is DodoDisburse?
-DodoDisburse serves as a unified command center for international finance teams. It allows companies to fund their corporate treasury using local payment methods (Cards, Bank Transfers, UPI) and instantly disburse those funds to a global workforce using USDC on Solana.
+## ✨ Key Features
+- **⚡ Instant USDC Settlements:** Convert slow fiat operations into sub-second Solana transfers.
+- **🔄 Monthly Auto-Fund:** "Set it and forget it" treasury management powered by Dodo Payments' recurring subscriptions.
+- **🛡️ Wallet Authorization Gate:** Payout executions are cryptographically protected. Treasury Admins must connect their Solana wallet and sign a transaction to approve mass payouts.
+- **📊 Immutable Ledger:** Real-time reconciliation hub with an append-only audit trail and CSV exports for accounting.
+- **👥 Contractor Management:** Centralized directory mapping traditional contractor identities to verified Web3 addresses.
 
 ---
 
 ## 🛠️ How it Works
-1.  **Fund:** The company tops up their treasury via a Dodo Payments checkout session ($USD).
-2.  **Verify:** A webhook confirms the payment and credits the internal ledger.
-3.  **Batch:** The treasurer creates a payout batch for contractors.
-4.  **Execute:** Funds are disbursed via SPL tokens on the Solana network in seconds.
-5.  **Reconcile:** All transactions are logged and exportable for accounting.
+1.  **Fund:** The company tops up their treasury via a Dodo Payments checkout session ($USD) or sets up a recurring Auto-Fund subscription.
+2.  **Verify:** A Svix-secured webhook confirms the payment and credits the internal ledger.
+3.  **Batch:** The treasurer creates a payout batch for global contractors.
+4.  **Authorize:** The Treasury Admin connects their Solana wallet (Phantom/Solflare) and signs the payout execution.
+5.  **Execute:** Funds are disbursed via SPL tokens (USDC) on the Solana network in seconds.
 
 ---
 
-## 🔄 Core Flows
-- **Fiat-to-Treasury Bridge:** Seamlessly convert fiat into a digital treasury balance via Dodo Payments.
-- **Contractor Lifecycle:** Manage contractor wallets, emails, and payment tiers in a central directory.
-- **Automated Payout Batches:** Group multiple contractor payments into a single approval workflow.
-- **Real-time Observability:** Track every webhook, reservation, and transfer through a live System Activity Feed.
-
----
-
-## 💼 Use Cases
-- **Global AI Startups:** Pay distributed researchers and engineers in USDC instantly.
-- **SaaS Platforms:** Manage international marketing and support contractor payroll.
-- **Web3 Foundations:** Simplify grant distributions and contributor rewards.
-- **Cross-border E-commerce:** Pay global vendors and logistics partners without wire fees.
+## 📂 Project Structure
+This repository is organized as a modern monorepo to ensure clean separation of concerns:
+- `apps/web/` — The Next.js 16 frontend, dashboard UI, and serverless API routes (including Dodo Webhooks).
+- `packages/db/` — Shared database schema (Drizzle ORM) and Neon serverless connection logic.
+- `packages/solana/` — Shared Web3 utilities for executing USDC transfers and managing on-chain interactions.
+- `packages/config/` — Centralized environment variables, Tailwind styles, and TypeScript configurations.
+- `scripts/` — Development utilities, including the database seeder for instant demo environments.
 
 ---
 
 ## 🏗️ Technology Stack
 | Layer | Technology |
 |-------|-----------|
-| **Frontend** | Next.js 16 (App Router), Tailwind CSS |
+| **Frontend** | Next.js 16 (App Router), Tailwind CSS, Framer Motion |
 | **Logic** | TypeScript, Drizzle ORM |
 | **Database** | Neon Postgres (Serverless) |
-| **Fiat Rail** | Dodo Payments (Checkout + Webhooks) |
-| **Settlement** | Solana Devnet (USDC SPL Tokens) |
-| **Animations** | Motion (framer-motion) |
+| **Fiat Rail** | Dodo Payments (Checkout, Subscriptions, Webhooks) |
+| **Settlement** | Solana Devnet, `@solana/wallet-adapter` |
+
+---
+
+## 🛡️ Security & Production Readiness
+We built DodoDisburse with enterprise-grade treasury security in mind:
+- **Admin Wallet Signatures:** Mass payouts cannot be triggered by a simple API call. The Treasury Admin must connect their verified Solana wallet and cryptographically sign the authorization payload.
+- **Webhook Signature Verification:** All inbound requests from Dodo Payments are cryptographically verified using **Svix** to prevent spoofing.
+- **Amount Matching:** The platform verifies that the payment amount received from Dodo exactly matches the internal intent before crediting the treasury.
+- **Idempotency Logic:** Every webhook event is persisted and checked against a `webhook_id` to prevent double-funding from duplicate deliveries.
+- **Balance Isolation:** Payout funds are "Reserved" from the available balance before execution to ensure solvency and prevent race conditions.
 
 ---
 
@@ -66,7 +80,7 @@ cp .env.example apps/web/.env.local
 ```
 
 ### 4. Database Setup
-Push the schema to your Neon instance:
+Push the schema to your Neon serverless instance:
 ```bash
 pnpm db:push
 ```
@@ -83,22 +97,4 @@ pnpm dev
 ```
 
 ---
-
-## 📜 Available Scripts
-- `pnpm dev`: Start the Next.js development server.
-- `pnpm build`: Build the application for production.
-- `pnpm db:push`: Sync the Drizzle schema with the database.
-- `pnpm seed`: Run the database seeding script for demo data.
-- `pnpm typecheck`: Run TypeScript compiler check.
-
----
-
-## 🛡️ Security & Production Readiness
-- **Webhook Signature Verification:** All inbound requests from Dodo Payments are cryptographically verified using **Svix** to prevent spoofing.
-- **Amount Matching:** The platform verifies that the payment amount received from Dodo matches the internal intent before crediting the treasury.
-- **Idempotency Logic:** Every webhook event is persisted and checked against a `webhook_id` to prevent double-funding from duplicate deliveries.
-- **Balance Isolation:** Payout funds are "Reserved" from the available balance before execution to ensure solvency and prevent race conditions.
-- **Immutable Audit Trail:** All financial movements are recorded in an append-only ledger that cannot be modified by the application logic.
-
----
-*Built for the Superteam x Dodo Payments Hackathon.*
+*Built with ❤️ for the Superteam x Dodo Payments Hackathon.*
