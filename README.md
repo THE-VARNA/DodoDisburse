@@ -1,5 +1,5 @@
 # 🦤 DodoDisburse
-**Global Payout Hub · Fiat to Crypto · Solana Settlements**
+**Global Payout Hub · - · Solana Settlements**
 
 [![Built for Hackathon](https://img.shields.io/badge/Built_for-Superteam_x_Dodo_Payments-6366f1?style=for-the-badge)](https://dodopayments.com)
 [![Solana](https://img.shields.io/badge/Powered_by-Solana-14F195?style=for-the-badge&logo=solana&logoColor=black)](#)
