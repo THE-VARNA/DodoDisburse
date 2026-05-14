@@ -15,14 +15,22 @@ const sqlClient = neon(DATABASE_URL);
 const db = drizzle(sqlClient);
 
 async function cleanup() {
-  console.log('🧹 Cleaning up contractors…');
+  console.log('🧹 Cleaning up contractors and associated payout items…');
   
+  await db.execute(sql`
+    DELETE FROM payout_items 
+    WHERE contractor_id IN (
+      SELECT id FROM contractors 
+      WHERE name IN ('Bob Nakamura', 'Alice Engineering', 'Alice Chen')
+    )
+  `);
+
   const res = await db.execute(sql`
     DELETE FROM contractors 
     WHERE name IN ('Bob Nakamura', 'Alice Engineering', 'Alice Chen')
   `);
   
-  console.log('✅ Deleted contractors:', res);
+  console.log('✅ Deleted contractors');
 }
 
 cleanup().catch(console.error);
