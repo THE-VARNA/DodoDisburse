@@ -159,7 +159,7 @@ export default function LandingClient() {
               Launch App
             </Link>
             <a 
-              href="https://www.loom.com/share/d5e58a6fc1644a62923f8c15b4238032" 
+              href="https://www.loom.com/share/d84fa4515bb247e3a765722b2f102cd9" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="btn btn-ghost" 
