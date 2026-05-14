@@ -2,7 +2,7 @@
 
 import { motion, Variants } from 'motion/react';
 import Link from 'next/link';
-import { ArrowRight, Diamond, Zap, Shield, CreditCard, Coins, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Diamond, Zap, Shield, CreditCard, Coins, CheckCircle2, Play } from 'lucide-react';
 
 export default function LandingClient() {
   const containerVariants: Variants = {
@@ -154,10 +154,28 @@ export default function LandingClient() {
             Bridge the gap between Fiat and Web3. Fund your treasury with credit cards instantly via Dodo Payments, and disburse USDC to contractors worldwide on Solana.
           </motion.p>
 
-          <motion.div variants={itemVariants} style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
+          <motion.div variants={itemVariants} style={{ display: 'flex', gap: 16, justifyContent: 'center', alignItems: 'center' }}>
             <Link href="/dashboard" className="btn btn-primary" style={{ padding: '16px 32px', fontSize: '1.1rem', borderRadius: 12, textDecoration: 'none' }}>
               Launch App
             </Link>
+            <a 
+              href="https://www.loom.com/share/d5e58a6fc1644a62923f8c15b4238032" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="btn btn-ghost" 
+              style={{ 
+                padding: '16px 32px', 
+                fontSize: '1.1rem', 
+                borderRadius: 12, 
+                textDecoration: 'none', 
+                border: '1px solid rgba(255,255,255,0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8
+              }}
+            >
+              <Play size={18} fill="currentColor" /> Watch Demo
+            </a>
           </motion.div>
         </motion.div>
 
