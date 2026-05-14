@@ -179,7 +179,6 @@ export async function GET(req: NextRequest) {
     // ── Seed Sample Contractors ───────────────────────────────────
     const contractors = [
       { name: 'Alice Chen',     email: 'alice@example.com', wallet: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU' },
-      { name: 'Bob Nakamura',   email: 'bob@example.com',   wallet: '9n4nbM75f5Ui33ZbPYXn59EwSgHk5pHKPDzEsVGPjZEJ' },
       { name: 'Carol Osei',     email: 'carol@example.com', wallet: 'GsbwXfJraMomNxBcjYLcG3mxkBUiyWXAB8dMEYmkQfb' },
     ];
 
