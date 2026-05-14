@@ -27,6 +27,7 @@ function ItemStatus({ item }: { item: BatchItem['item'] }) {
 }
 
 import { useWallet } from '@solana/wallet-adapter-react';
+import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 
 export default function BatchDetailPage() {
   const { batchId } = useParams<{ batchId: string }>();
@@ -34,6 +35,7 @@ export default function BatchDetailPage() {
   const [approving, setApproving] = useState(false);
   const [executing, setExecuting] = useState(false);
   const { connected, publicKey, signMessage } = useWallet();
+  const { setVisible } = useWalletModal();
 
   const load = useCallback(async () => {
     try {
@@ -58,7 +60,7 @@ export default function BatchDetailPage() {
 
   async function handleExecute() {
     if (!connected || !publicKey) {
-      toast('Please connect your admin wallet to execute payouts', 'error');
+      setVisible(true);
       return;
     }
 
