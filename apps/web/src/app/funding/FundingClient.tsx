@@ -30,6 +30,7 @@ export default function FundingPageClient({ intents }: Props) {
   const [loading, setLoading] = useState<string | null>(null);
   const [isSubscription, setIsSubscription] = useState(false);
   const [customAmount, setCustomAmount] = useState<string>('1000');
+  const [showAll, setShowAll] = useState(false);
 
   async function handleFund(tierId: string) {
     setLoading(tierId);
@@ -70,6 +71,8 @@ export default function FundingPageClient({ intents }: Props) {
     if (status === 'processing') return 'badge badge-warning';
     return 'badge badge-info';
   }
+
+  const displayedIntents = showAll ? intents : intents.slice(0, 10);
 
   return (
     <div style={{ padding: '40px', maxWidth: 1000 }}>
@@ -177,39 +180,72 @@ export default function FundingPageClient({ intents }: Props) {
 
       {/* Payment History */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }} className="glass-card" style={{ marginTop: 40, padding: 24 }}>
-        <h2 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#94a3b8', margin: '0 0 20px' }}>Payment History</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h2 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#94a3b8', margin: 0 }}>Payment History</h2>
+          {intents.length > 10 && (
+            <button 
+              onClick={() => setShowAll(!showAll)} 
+              style={{ 
+                background: 'transparent', 
+                border: 'none', 
+                color: '#6366f1', 
+                fontSize: '0.8125rem', 
+                fontWeight: 500, 
+                cursor: 'pointer',
+                padding: '4px 8px',
+                borderRadius: 4,
+                transition: 'background 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(99,102,241,0.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+            >
+              {showAll ? 'Show Less' : 'View All'}
+            </button>
+          )}
+        </div>
+        
         {intents.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '32px 0', color: '#334155' }}>
             No funding history yet
           </div>
         ) : (
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Tier</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {intents.map((intent) => (
-                <tr key={intent.id}>
-                  <td style={{ color: '#e2e8f0' }}>{intent.tierLabel}</td>
-                  <td style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#f8fafc', fontWeight: 600 }}>
-                    {formatUsd(intent.amountMinor)}
-                  </td>
-                  <td>
-                    <span className={badgeClass(intent.status)} style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                      <StatusIcon status={intent.status} />
-                      {intent.status}
-                    </span>
-                  </td>
-                  <td>{formatDate(intent.createdAt)}</td>
+          <>
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Tier</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Date</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {displayedIntents.map((intent) => (
+                  <tr key={intent.id}>
+                    <td style={{ color: '#e2e8f0' }}>{intent.tierLabel}</td>
+                    <td style={{ fontFamily: 'Space Grotesk, sans-serif', color: '#f8fafc', fontWeight: 600 }}>
+                      {formatUsd(intent.amountMinor)}
+                    </td>
+                    <td>
+                      <span className={badgeClass(intent.status)} style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                        <StatusIcon status={intent.status} />
+                        {intent.status}
+                      </span>
+                    </td>
+                    <td>{formatDate(intent.createdAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            
+            {!showAll && intents.length > 10 && (
+              <div style={{ textAlign: 'center', marginTop: 16 }}>
+                <p style={{ fontSize: '0.75rem', color: '#475569' }}>
+                  Showing 10 of {intents.length} entries
+                </p>
+              </div>
+            )}
+          </>
         )}
       </motion.div>
     </div>
