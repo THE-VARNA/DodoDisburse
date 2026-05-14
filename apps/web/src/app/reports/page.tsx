@@ -2,7 +2,8 @@ import { db } from '@/lib/db';
 import { payoutBatches, ledgerEntries, tenants } from '@gcp/db';
 import { eq, desc, sql } from 'drizzle-orm';
 import { Download, BarChart3, TrendingUp, TrendingDown, Clock } from 'lucide-react';
-import { formatUsd, formatDate } from '@/lib/utils';
+import { formatUsd } from '@/lib/utils';
+import RecentBatches from './RecentBatches';
 
 const DEMO_TENANT_ID = 'f582c4cf-2f41-48e9-a795-d2f263f6baf1';
 
@@ -14,8 +15,7 @@ export default async function ReportsPage() {
     .select()
     .from(payoutBatches)
     .where(eq(payoutBatches.tenantId, DEMO_TENANT_ID))
-    .orderBy(desc(payoutBatches.createdAt))
-    .limit(10);
+    .orderBy(desc(payoutBatches.createdAt));
 
   const stats = await db
     .select({
@@ -50,39 +50,7 @@ export default async function ReportsPage() {
         ))}
       </div>
 
-      <div className="glass-card" style={{ padding: 24, marginBottom: 32 }}>
-        <h2 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#94a3b8', margin: '0 0 20px' }}>Recent Payout Batches</h2>
-        {batches.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '32px 0', color: '#334155' }}>No batches found</div>
-        ) : (
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Batch Name</th>
-                <th>Status</th>
-                <th>Recipients</th>
-                <th>Total Amount</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {batches.map((b) => (
-                <tr key={b.id}>
-                  <td style={{ color: '#e2e8f0' }}>{b.label}</td>
-                  <td>
-                    <span className={`badge ${b.status === 'completed' ? 'badge-success' : b.status === 'failed' ? 'badge-danger' : 'badge-warning'}`}>
-                      {b.status}
-                    </span>
-                  </td>
-                  <td>{b.recipientCount}</td>
-                  <td style={{ fontWeight: 600, color: '#f8fafc' }}>{formatUsd(b.totalAmountMinor)}</td>
-                  <td>{formatDate(b.createdAt)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+      <RecentBatches batches={batches as any} />
 
       <div className="glass-card" style={{ padding: 32, textAlign: 'center', background: 'rgba(99,102,241,0.03)' }}>
         <BarChart3 size={32} color="#6366f1" style={{ marginBottom: 16 }} />

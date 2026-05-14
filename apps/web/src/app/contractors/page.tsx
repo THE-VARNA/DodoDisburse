@@ -83,9 +83,13 @@ export default function ContractorsPage() {
     }
   }
 
+  const [showAll, setShowAll] = useState(false);
+
   const filtered = contractors.filter(
     (c) => c.name.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase())
   );
+
+  const displayed = showAll ? filtered : filtered.slice(0, 10);
 
   return (
     <div style={{ padding: 40, maxWidth: 1000 }}>
@@ -93,7 +97,17 @@ export default function ContractorsPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
         <div>
           <h1 style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc', margin: 0 }}>Contractors</h1>
-          <p style={{ color: '#64748b', marginTop: 6, fontSize: '0.875rem' }}>{contractors.length} registered · Solana wallet addresses</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+            <p style={{ color: '#64748b', fontSize: '0.875rem', margin: 0 }}>{contractors.length} registered · Solana wallet addresses</p>
+            {filtered.length > 10 && (
+              <button 
+                onClick={() => setShowAll(!showAll)} 
+                style={{ background: 'transparent', border: 'none', color: '#6366f1', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', padding: '2px 6px', borderRadius: 4 }}
+              >
+                {showAll ? 'Show Less' : 'View All'}
+              </button>
+            )}
+          </div>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
           <button id="import-contractors-btn" onClick={() => setShowImport(true)} className="btn btn-ghost">
@@ -121,31 +135,38 @@ export default function ContractorsPage() {
       <div className="glass-card" style={{ padding: 0, overflow: 'hidden' }}>
         {loading ? (
           <div style={{ padding: 48, textAlign: 'center', color: '#334155' }}>Loading…</div>
-        ) : filtered.length === 0 ? (
+        ) : displayed.length === 0 ? (
           <div style={{ padding: 48, textAlign: 'center' }}>
             <Users size={32} color="#1e293b" style={{ marginBottom: 12 }} />
             <p style={{ color: '#334155', margin: 0 }}>No contractors found</p>
           </div>
         ) : (
-          <table className="data-table">
-            <thead><tr>
-              <th>Name</th><th>Email</th><th>Wallet</th><th>Status</th>
-            </tr></thead>
-            <tbody>
-              {filtered.map((c) => (
-                <motion.tr key={c.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  <td style={{ color: '#e2e8f0', fontWeight: 500 }}>{c.name}</td>
-                  <td>{c.email}</td>
-                  <td>
-                    <span style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: '#6366f1' }}>
-                      {shortenAddress(c.walletAddress)}
-                    </span>
-                  </td>
-                  <td><span className={statusClass(c.status)}>{c.status}</span></td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
+          <>
+            <table className="data-table">
+              <thead><tr>
+                <th>Name</th><th>Email</th><th>Wallet</th><th>Status</th>
+              </tr></thead>
+              <tbody>
+                {displayed.map((c) => (
+                  <motion.tr key={c.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    <td style={{ color: '#e2e8f0', fontWeight: 500 }}>{c.name}</td>
+                    <td>{c.email}</td>
+                    <td>
+                      <span style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: '#6366f1' }}>
+                        {shortenAddress(c.walletAddress)}
+                      </span>
+                    </td>
+                    <td><span className={statusClass(c.status)}>{c.status}</span></td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+            {!showAll && filtered.length > 10 && (
+              <div style={{ textAlign: 'center', padding: '12px 0', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                <p style={{ fontSize: '0.75rem', color: '#475569', margin: 0 }}>Showing 10 of {filtered.length} contractors</p>
+              </div>
+            )}
+          </>
         )}
       </div>
 
